@@ -1,0 +1,32 @@
+# ===== Java / Spring Boot =====
+backend/target/
+*.class
+*.jar
+.mvn/
+mvnw
+mvnw.cmd
+
+# ===== Node / Angular =====
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+npm-debug.log*
+yarn-error.log*
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# ===== Sistema Operativo =====
+.DS_Store
+Thumbs.db
+
+# ===== Variables de entorno =====
+.env
+*.env.local
+
+# ===== Logs =====
+*.log
