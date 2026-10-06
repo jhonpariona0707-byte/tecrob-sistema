@@ -1,0 +1,281 @@
+<div class="min-h-screen bg-gray-100 py-8 px-4">
+
+  <!-- Botones de acción (no se imprimen) -->
+  <div class="max-w-4xl mx-auto mb-4 flex justify-between no-print">
+    <button (click)="volver()"
+            class="bg-tecrob-grayMid text-tecrob-black px-4 py-2 rounded-lg font-semibold hover:bg-tecrob-grayText transition-all">
+      ← Volver
+    </button>
+    <button (click)="imprimir()"
+            class="bg-tecrob-red text-white px-6 py-2 rounded-lg font-bold hover:bg-tecrob-redDark transition-all shadow-lg">
+      🖨️ Imprimir
+    </button>
+  </div>
+
+  <!-- TICKET -->
+  <div *ngIf="orden" class="max-w-4xl mx-auto bg-white shadow-2xl rounded-lg p-6 print-ticket">
+
+    <!-- ============================================
+         COPIA 1: TIENDA
+    ============================================= -->
+    <div class="ticket-copy relative">
+
+      <!-- BARRA SUPERIOR DERECHA (pegada al borde de corte) -->
+      <div class="barcode-top-right">
+        <div class="barcode-box">
+          <svg #barcode1></svg>
+        </div>
+      </div>
+
+      <!-- Franja superior -->
+      <div class="flex justify-between items-center bg-tecrob-black text-white px-3 py-1 text-xs">
+        <span class="font-bold">ORDEN PARA EL TALLER</span>
+        <span>{{ orden.numOrden }}</span>
+      </div>
+
+      <!-- Encabezado -->
+      <div class="flex justify-between items-start border-b-2 border-tecrob-red pb-2 mb-2 mt-2">
+        <div class="flex items-center gap-2">
+          <div class="w-12 h-12 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-lg">
+            TR
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-tecrob-black">MULTISERVICIOS TECROB SVS E.I.R.L.</h1>
+            <p class="text-[9px] text-tecrob-grayText">COL: 943582185 | luis&#64;tecrob.com | JR. LIBERTAD N 889A - AYACUCHO</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-[9px] text-tecrob-grayText">F. Impresión: {{ orden.fechaIngreso | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="flex justify-center mb-2">
+        <canvas #qrCanvas></canvas>
+      </div>
+
+      <!-- Tabla -->
+      <table class="w-full border-collapse text-[10px] mb-2">
+        <tbody>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">CLIENTE:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.cliente.nombre }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">DNI/RUC:</td>
+            <td class="py-1 px-2 w-[35%]">{{ orden.cliente.dni }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">TELÉFONO:</td>
+            <td class="py-1 px-2">{{ orden.cliente.telefono }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">DIRECCIÓN:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.cliente.direccion || 'No registrada' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">PRODUCTO:</td>
+            <td class="py-1 px-2">{{ orden.equipo.tipo }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">MARCA:</td>
+            <td class="py-1 px-2">{{ orden.equipo.marca }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">MODELO:</td>
+            <td class="py-1 px-2">{{ orden.equipo.modelo }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">SERIE:</td>
+            <td class="py-1 px-2">{{ orden.equipo.serie }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">DESCRIPCIÓN:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.equipo.descripcion || 'Sin descripción' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">ACCESORIOS:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.accesorios.length > 0 ? orden.accesorios.join(', ') : 'Ninguno' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">RESPONSABLE:</td>
+            <td class="py-1 px-2">{{ orden.responsable || 'Pendiente' }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">F. ENTREGA:</td>
+            <td class="py-1 px-2">{{ orden.fechaPrometida || 'Por definir' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">SUB-TOTAL:</td>
+            <td class="py-1 px-2">S/ {{ orden.subtotal.toFixed(2) }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">ADELANTO:</td>
+            <td class="py-1 px-2">S/ {{ orden.adelanto.toFixed(2) }}</td>
+          </tr>
+          <tr>
+            <td class="py-1 px-2 font-bold bg-gray-100">SERVICIO:</td>
+            <td class="py-1 px-2">{{ orden.tipoServicio }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">SALDO:</td>
+            <td class="py-1 px-2 font-bold text-tecrob-red">
+              S/ {{ (orden.subtotal - orden.adelanto).toFixed(2) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Firmas -->
+      <div class="grid grid-cols-2 gap-4 mt-4 items-end">
+        <div class="text-center">
+          <div class="border-t border-gray-400 pt-1">
+            <p class="text-[9px] text-tecrob-grayText">Recibí Conforme (Cliente)</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2">
+          <div class="text-center flex-1">
+            <div class="border-t border-gray-400 pt-1">
+              <p class="text-[9px] text-tecrob-grayText">Firma Autorizada</p>
+            </div>
+          </div>
+          <div class="w-10 h-10 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-xs">
+            TR
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Línea de corte -->
+    <div class="my-2 text-center relative">
+      <div class="border-t-2 border-dashed border-gray-400 w-full"></div>
+      <span class="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-xs text-gray-500">
+        ✂ CORTAR AQUÍ ✂
+      </span>
+    </div>
+
+    <!-- ============================================
+         COPIA 2: CLIENTE
+    ============================================= -->
+    <div class="ticket-copy relative">
+
+      <!-- Franja superior -->
+      <div class="flex justify-between items-center bg-tecrob-red text-white px-3 py-1 text-xs">
+        <span class="font-bold">COMPROBANTE DEL CLIENTE</span>
+        <span>{{ orden.numOrden }}</span>
+      </div>
+
+      <!-- Encabezado -->
+      <div class="flex justify-between items-start border-b-2 border-tecrob-red pb-2 mb-2 mt-2">
+        <div class="flex items-center gap-2">
+          <div class="w-12 h-12 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-lg">
+            TR
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-tecrob-black">MULTISERVICIOS TECROB SVS E.I.R.L.</h1>
+            <p class="text-[9px] text-tecrob-grayText">COL: 943582185 | luis&#64;tecrob.com | JR. LIBERTAD N 889A - AYACUCHO</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-[9px] text-tecrob-grayText">F. Impresión: {{ orden.fechaIngreso | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="flex justify-center mb-2">
+        <canvas #qrCanvas2></canvas>
+      </div>
+
+      <!-- Tabla -->
+      <table class="w-full border-collapse text-[10px] mb-2">
+        <tbody>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">CLIENTE:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.cliente.nombre }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">DNI/RUC:</td>
+            <td class="py-1 px-2 w-[35%]">{{ orden.cliente.dni }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">TELÉFONO:</td>
+            <td class="py-1 px-2">{{ orden.cliente.telefono }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">DIRECCIÓN:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.cliente.direccion || 'No registrada' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">PRODUCTO:</td>
+            <td class="py-1 px-2">{{ orden.equipo.tipo }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">MARCA:</td>
+            <td class="py-1 px-2">{{ orden.equipo.marca }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">MODELO:</td>
+            <td class="py-1 px-2">{{ orden.equipo.modelo }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">SERIE:</td>
+            <td class="py-1 px-2">{{ orden.equipo.serie }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">DESCRIPCIÓN:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.equipo.descripcion || 'Sin descripción' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">ACCESORIOS:</td>
+            <td class="py-1 px-2" colspan="3">{{ orden.accesorios.length > 0 ? orden.accesorios.join(', ') : 'Ninguno' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">RESPONSABLE:</td>
+            <td class="py-1 px-2">{{ orden.responsable || 'Pendiente' }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">F. ENTREGA:</td>
+            <td class="py-1 px-2">{{ orden.fechaPrometida || 'Por definir' }}</td>
+          </tr>
+          <tr class="border-b border-gray-300">
+            <td class="py-1 px-2 font-bold bg-gray-100">SUB-TOTAL:</td>
+            <td class="py-1 px-2">S/ {{ orden.subtotal.toFixed(2) }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">ADELANTO:</td>
+            <td class="py-1 px-2">S/ {{ orden.adelanto.toFixed(2) }}</td>
+          </tr>
+          <tr>
+            <td class="py-1 px-2 font-bold bg-gray-100">SERVICIO:</td>
+            <td class="py-1 px-2">{{ orden.tipoServicio }}</td>
+            <td class="py-1 px-2 font-bold bg-gray-100">SALDO:</td>
+            <td class="py-1 px-2 font-bold text-tecrob-red">
+              S/ {{ (orden.subtotal - orden.adelanto).toFixed(2) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Firmas -->
+      <div class="grid grid-cols-2 gap-4 mt-4 items-end">
+        <div class="text-center">
+          <div class="border-t border-gray-400 pt-1">
+            <p class="text-[9px] text-tecrob-grayText">Recibí Conforme (Cliente)</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2">
+          <div class="text-center flex-1">
+            <div class="border-t border-gray-400 pt-1">
+              <p class="text-[9px] text-tecrob-grayText">Firma Autorizada</p>
+            </div>
+          </div>
+          <div class="w-10 h-10 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-xs">
+            TR
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRA INFERIOR DERECHA (2 barras con cuadro punteado) -->
+      <div class="barcode-bottom-right">
+        <div class="barcode-box mb-1">
+          <svg #barcode2></svg>
+        </div>
+        <div class="barcode-box">
+          <svg #barcode3></svg>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Mensaje si no se encuentra la orden -->
+  <div *ngIf="!orden" class="max-w-4xl mx-auto bg-white shadow-2xl rounded-lg p-8 text-center">
+    <p class="text-2xl mb-4">❌</p>
+    <h2 class="text-xl font-bold text-tecrob-black mb-2">Orden no encontrada</h2>
+    <p class="text-tecrob-grayText">La orden solicitada no existe.</p>
+    <button (click)="volver()" class="mt-4 bg-tecrob-red text-white px-6 py-2 rounded-lg font-bold">
+      Volver a Órdenes
+    </button>
+  </div>
+
+</div>

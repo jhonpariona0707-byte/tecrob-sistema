@@ -65,9 +65,10 @@
   </nav>
 
   <div class="p-3 border-t border-gray-700">
-    <a class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-redDark transition-all text-sm font-medium cursor-pointer text-red-300">
-      <span class="text-lg">🚪</span>
-      <span>Cerrar Sesión</span>
+    <a (click)="cerrarSesion()" 
+       class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-redDark transition-all text-sm font-medium cursor-pointer text-red-300">
+       <span class="text-lg">🚪</span>
+       <span>Cerrar Sesión</span>
     </a>
   </div>
 

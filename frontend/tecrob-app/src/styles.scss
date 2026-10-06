@@ -5,3 +5,58 @@
 /* Estilos globales */
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* ============================================
+   ESTILOS DE IMPRESIÓN GLOBALES
+   Ocultar layout completo al imprimir
+============================================ */
+@media print {
+  /* Ocultar topbar, sidebar, footer */
+  app-topbar,
+  app-sidebar,
+  app-footer,
+  .sidebar,
+  .topbar {
+    display: none !important;
+  }
+
+  /* Quitar márgenes del contenido principal */
+  .content,
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Ocultar el contenedor flex del layout */
+  body,
+  html {
+    background: white !important;
+  }
+
+  /* Asegurar que el ticket ocupe toda la hoja */
+  .print-ticket {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Ocultar botones de acción */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ajustar el fondo de la página del ticket */
+  .min-h-screen {
+    min-height: auto !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+    /* Configuración de página A4 */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}

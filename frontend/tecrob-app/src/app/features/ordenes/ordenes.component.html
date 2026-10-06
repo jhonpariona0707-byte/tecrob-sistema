@@ -1,15 +1,193 @@
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-3xl font-bold text-tecrob-black">🔧 Órdenes de Servicio</h1>
-      <p class="text-tecrob-grayText mt-1">Gestión de reparaciones de TecRob</p>
+
+  <!-- Encabezado -->
+  <div class="bg-gradient-to-r from-tecrob-red to-tecrob-redDark text-white rounded-2xl p-6 shadow-xl">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold">Generar Orden de Reparación</h1>
+        <p class="text-white/80 text-sm mt-1">Complete los datos para crear una nueva orden</p>
+      </div>
+      <button (click)="limpiarFormulario()" 
+              class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+        🔄 Limpiar
+      </button>
     </div>
-    <button class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg">
-      + Nueva Orden
-    </button>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-lg p-8 text-center text-tecrob-grayText">
-    Módulo de órdenes de servicio en construcción
+  <!-- Alerta de éxito -->
+  <div *ngIf="guardado && ordenGenerada" 
+       class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
+    ✅ Orden <strong>{{ ordenGenerada.numOrden }}</strong> generada correctamente. Redirigiendo al ticket...
   </div>
+
+  <!-- Formulario -->
+  <form (ngSubmit)="generarOrden()" class="space-y-6">
+
+    <!-- DATOS DEL CLIENTE -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-tecrob-red">
+      <h2 class="text-lg font-bold text-tecrob-black mb-4">👤 DATOS DEL CLIENTE</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">DNI / RUC</label>
+          <input type="text" [(ngModel)]="orden.cliente.dni" name="dni"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Nombre Completo</label>
+          <input type="text" [(ngModel)]="orden.cliente.nombre" name="nombre"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Teléfono</label>
+          <input type="text" [(ngModel)]="orden.cliente.telefono" name="telefono"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Correo Electrónico</label>
+          <input type="email" [(ngModel)]="orden.cliente.email" name="email"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+                <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Dirección</label>
+          <input type="text" [(ngModel)]="orden.cliente.direccion" name="direccion"
+                 placeholder="JR. LIBERTAD N 889A - AYACUCHO"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DATOS DEL EQUIPO -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-tecrob-black">
+      <h2 class="text-lg font-bold text-tecrob-black mb-4">💻 DATOS DEL EQUIPO</h2>
+      
+      <div class="mb-4">
+        <label class="block text-xs font-semibold text-tecrob-grayText mb-2">Tipo de Equipo</label>
+        <div class="flex flex-wrap gap-2">
+          <button *ngFor="let tipo of tiposEquipo" type="button"
+                  (click)="orden.equipo.tipo = tipo"
+                  [class.bg-tecrob-red]="orden.equipo.tipo === tipo"
+                  [class.text-white]="orden.equipo.tipo === tipo"
+                  [class.bg-white]="orden.equipo.tipo !== tipo"
+                  class="px-3 py-1 text-xs font-semibold border-2 border-tecrob-red rounded-full hover:bg-tecrob-red hover:text-white transition-all">
+            {{ tipo }}
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Marca</label>
+          <input type="text" [(ngModel)]="orden.equipo.marca" name="marca"
+                 placeholder="HP, LENOVO, ASUS..."
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Modelo</label>
+          <input type="text" [(ngModel)]="orden.equipo.modelo" name="modelo"
+                 placeholder="L3250, 240 G8..."
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Serie</label>
+          <input type="text" [(ngModel)]="orden.equipo.serie" name="serie"
+                 placeholder="Por favor introduzca 5 caracteres"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Descripción del problema</label>
+          <textarea [(ngModel)]="orden.equipo.descripcion" name="descripcion" rows="3"
+                    placeholder="Describa el problema reportado por el cliente..."
+                    class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÁREA Y SERVICIO -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-lg font-bold text-tecrob-black mb-4">🏢 DATOS DEL ÁREA Y SERVICIO</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Área</label>
+          <select [(ngModel)]="orden.area" name="area"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option *ngFor="let a of areas" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Tipo de Servicio</label>
+          <select [(ngModel)]="orden.tipoServicio" name="tipoServicio"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option *ngFor="let t of tiposServicio" [value]="t">{{ t }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Prioridad</label>
+          <select [(ngModel)]="orden.prioridad" name="prioridad"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option *ngFor="let p of prioridades" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Responsable</label>
+          <input type="text" [(ngModel)]="orden.responsable" name="responsable"
+                 placeholder="Nombre del técnico"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+                <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Adelanto (S/)</label>
+          <input type="number" step="0.01" [(ngModel)]="orden.adelanto" name="adelanto"
+                 placeholder="0.00"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-tecrob-grayText mb-1">Sub-Total (S/)</label>
+          <input type="number" step="0.01" [(ngModel)]="orden.subtotal" name="subtotal"
+                 placeholder="0.00"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCESORIOS -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-lg font-bold text-tecrob-black mb-4">🔌 ACCESORIOS</h2>
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let acc of accesoriosDisponibles" type="button"
+                (click)="toggleAccesorio(acc)"
+                [class.bg-tecrob-red]="acc.seleccionado"
+                [class.text-white]="acc.seleccionado"
+                [class.bg-white]="!acc.seleccionado"
+                class="px-3 py-1 text-xs font-semibold border-2 border-tecrob-red rounded-full hover:bg-tecrob-red hover:text-white transition-all">
+          {{ acc.nombre }}
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="flex justify-end gap-3">
+      <button type="button" (click)="limpiarFormulario()"
+              class="px-6 py-3 bg-tecrob-grayMid text-tecrob-black rounded-lg font-bold hover:bg-tecrob-grayText transition-all">
+        Cancelar
+      </button>
+      <button type="submit"
+              class="px-8 py-3 bg-tecrob-red hover:bg-tecrob-redDark text-white rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+        🎫 Generar Orden
+      </button>
+    </div>
+
+  </form>
+
 </div>

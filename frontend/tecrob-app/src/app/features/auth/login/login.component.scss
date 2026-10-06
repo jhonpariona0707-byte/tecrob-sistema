@@ -1,0 +1,125 @@
+.login-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #F5F5F5 0%, #E8E8E8 50%, #D0D0D0 100%);
+  overflow: hidden;
+  padding: 20px;
+
+  // Patrón de puntos sutil
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+  }
+}
+
+// Forma roja superior izquierda (principal)
+.shape {
+  position: absolute;
+  pointer-events: none;
+}
+
+.shape-top-left {
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 35%;
+  background: linear-gradient(135deg, #E30613 0%, #B00510 100%);
+  clip-path: polygon(0 0, 100% 0, 85% 70%, 60% 100%, 0 80%);
+  z-index: 1;
+}
+
+.shape-top-left-line {
+  top: 8%;
+  left: 0;
+  width: 38%;
+  height: 30%;
+  background: #111111;
+  clip-path: polygon(0 0, 100% 0, 85% 70%, 60% 100%, 0 80%);
+  z-index: 2;
+}
+
+.shape-bottom-right {
+  bottom: 0;
+  right: 0;
+  width: 45%;
+  height: 35%;
+  background: linear-gradient(135deg, #B00510 0%, #E30613 100%);
+  clip-path: polygon(15% 0, 100% 20%, 100% 100%, 0 100%);
+  z-index: 1;
+}
+
+.shape-bottom-right-line {
+  bottom: 8%;
+  right: 0;
+  width: 38%;
+  height: 30%;
+  background: #111111;
+  clip-path: polygon(15% 0, 100% 20%, 100% 100%, 0 100%);
+  z-index: 2;
+}
+
+// Caja del login
+.login-box {
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 50px 45px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-top: 4px solid #E30613;
+  max-width: 420px;
+  width: 100%;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+// Logo circular
+.logo-circle {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #E30613, #B00510);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 8px 20px rgba(227, 6, 19, 0.4);
+}
+
+// Animación de entrada
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .login-box {
+    padding: 40px 25px;
+  }
+
+  .shape-top-left,
+  .shape-bottom-right {
+    width: 60%;
+    height: 25%;
+  }
+
+  .shape-top-left-line,
+  .shape-bottom-right-line {
+    width: 50%;
+    height: 20%;
+  }
+}

@@ -26,9 +26,13 @@
 
     <!-- Usuario -->
     <div class="flex items-center gap-3">
-      <span class="text-sm hidden sm:inline">👤 Admin</span>
-      <div class="w-9 h-9 bg-tecrob-red rounded-full flex items-center justify-center font-bold">
-        A
+      <div class="text-right hidden sm:block">
+        <p class="text-sm font-semibold leading-tight">{{ usuario?.nombre }}</p>
+        <p class="text-xs text-tecrob-grayMid capitalize">{{ usuario?.rol }}</p>
+      </div>
+      <div class="w-9 h-9 bg-tecrob-red rounded-full flex items-center justify-center font-bold cursor-pointer hover:bg-tecrob-redDark transition-all"
+           (click)="cerrarSesion()">
+        {{ inicialUsuario }}
       </div>
     </div>
 
