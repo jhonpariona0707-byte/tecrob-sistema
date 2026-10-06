@@ -1,0 +1,22 @@
+<div class="min-h-screen flex flex-col bg-tecrob-grayLight">
+
+  <!-- TOPBAR -->
+  <app-topbar></app-topbar>
+
+  <!-- CUERPO -->
+  <div class="flex flex-1">
+    
+    <!-- SIDEBAR -->
+    <app-sidebar></app-sidebar>
+
+    <!-- CONTENIDO DINÁMICO -->
+    <main class="flex-1 p-6">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+  <!-- FOOTER -->
+  <app-footer></app-footer>
+
+</div>
