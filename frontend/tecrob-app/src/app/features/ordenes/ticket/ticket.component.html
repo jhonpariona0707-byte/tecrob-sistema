@@ -18,127 +18,130 @@
     <!-- ============================================
          COPIA 1: TIENDA
     ============================================= -->
-    <div class="ticket-copy relative">
+    <div class="ticket-copy">
 
-      <!-- BARRA SUPERIOR DERECHA (pegada al borde de corte) -->
-      <div class="barcode-top-right">
-        <div class="barcode-box">
-          <svg #barcode1></svg>
-        </div>
-      </div>
-
-      <!-- Franja superior -->
-      <div class="flex justify-between items-center bg-tecrob-black text-white px-3 py-1 text-xs">
-        <span class="font-bold">ORDEN PARA EL TALLER</span>
+      <!-- Franja superior negra con borde redondeado -->
+      <div class="flex justify-between items-center bg-gradient-to-r from-tecrob-black to-tecrob-blackSoft text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md">
+        <span>ORDEN PARA EL TALLER</span>
         <span>{{ orden.numOrden }}</span>
       </div>
 
-      <!-- Encabezado -->
-      <div class="flex justify-between items-start border-b-2 border-tecrob-red pb-2 mb-2 mt-2">
-        <div class="flex items-center gap-2">
-          <div class="w-12 h-12 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-lg">
-            TR
+      <!-- ENCABEZADO -->
+      <div class="mt-3 mb-3 flex items-center gap-3 border-b-2 border-tecrob-red pb-2">
+        <img src="assets/logo.png" alt="Logo TecRob" class="ticket-logo w-36 h-20 object-contain">
+        <div class="min-w-0 flex-1">
+          <div class="flex justify-between items-start">
+            <p class="text-[9px] text-tecrob-grayText">COL: 943582185 &nbsp;|&nbsp; luis&#64;tecrob.com &nbsp;|&nbsp; JR. LIBERTAD N 889A - AYACUCHO</p>
+            <p class="text-[9px] text-tecrob-grayText italic">F. Impresión: {{ orden.fechaIngreso | date:'dd/MM/yyyy' }}</p>
           </div>
-          <div>
-            <h1 class="text-sm font-bold text-tecrob-black">MULTISERVICIOS TECROB SVS E.I.R.L.</h1>
-            <p class="text-[9px] text-tecrob-grayText">COL: 943582185 | luis&#64;tecrob.com | JR. LIBERTAD N 889A - AYACUCHO</p>
-          </div>
-        </div>
-        <div class="text-right">
-          <p class="text-[9px] text-tecrob-grayText">F. Impresión: {{ orden.fechaIngreso | date:'dd/MM/yyyy HH:mm' }}</p>
         </div>
       </div>
 
-      <!-- QR -->
-      <div class="flex justify-center mb-2">
-        <canvas #qrCanvas></canvas>
+      <!-- QR con marco decorativo -->
+      <div class="flex justify-center mb-3">
+        <div class="qr-frame">
+          <canvas #qrCanvas></canvas>
+        </div>
       </div>
 
-      <!-- Tabla -->
-      <table class="w-full border-collapse text-[10px] mb-2">
-        <tbody>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">CLIENTE:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.cliente.nombre }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">DNI/RUC:</td>
-            <td class="py-1 px-2 w-[35%]">{{ orden.cliente.dni }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">TELÉFONO:</td>
-            <td class="py-1 px-2">{{ orden.cliente.telefono }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">DIRECCIÓN:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.cliente.direccion || 'No registrada' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">PRODUCTO:</td>
-            <td class="py-1 px-2">{{ orden.equipo.tipo }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">MARCA:</td>
-            <td class="py-1 px-2">{{ orden.equipo.marca }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">MODELO:</td>
-            <td class="py-1 px-2">{{ orden.equipo.modelo }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">SERIE:</td>
-            <td class="py-1 px-2">{{ orden.equipo.serie }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">DESCRIPCIÓN:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.equipo.descripcion || 'Sin descripción' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">ACCESORIOS:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.accesorios.length > 0 ? orden.accesorios.join(', ') : 'Ninguno' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">RESPONSABLE:</td>
-            <td class="py-1 px-2">{{ orden.responsable || 'Pendiente' }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">F. ENTREGA:</td>
-            <td class="py-1 px-2">{{ orden.fechaPrometida || 'Por definir' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">SUB-TOTAL:</td>
-            <td class="py-1 px-2">S/ {{ orden.subtotal.toFixed(2) }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">ADELANTO:</td>
-            <td class="py-1 px-2">S/ {{ orden.adelanto.toFixed(2) }}</td>
-          </tr>
-          <tr>
-            <td class="py-1 px-2 font-bold bg-gray-100">SERVICIO:</td>
-            <td class="py-1 px-2">{{ orden.tipoServicio }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">SALDO:</td>
-            <td class="py-1 px-2 font-bold text-tecrob-red">
-              S/ {{ (orden.subtotal - orden.adelanto).toFixed(2) }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- TABLA DE DATOS -->
+      <div class="data-section">
+        <table class="w-full text-[10px]">
+          <tbody>
+            <tr class="data-row">
+              <td class="label-cell w-[12%]">CLIENTE:</td>
+              <td class="value-cell w-[38%]">{{ orden.cliente.nombre }} <span class="text-tecrob-grayText">({{ orden.cliente.dni }})</span></td>
+              <td class="label-cell w-[12%]">TELÉFONO:</td>
+              <td class="value-cell">{{ orden.cliente.telefono }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">PRODUCTO:</td>
+              <td class="value-cell">{{ orden.equipo.tipo }}</td>
+              <td class="label-cell">MARCA:</td>
+              <td class="value-cell">{{ orden.equipo.marca }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">MODELO:</td>
+              <td class="value-cell">{{ orden.equipo.modelo }}</td>
+              <td class="label-cell">SERIE:</td>
+              <td class="value-cell">{{ orden.equipo.serie }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">DESCRIPCIÓN:</td>
+              <td class="value-cell" colspan="3">{{ orden.equipo.descripcion || 'Sin descripción' }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">ACCESORIOS:</td>
+              <td class="value-cell" colspan="3">{{ orden.accesorios.length > 0 ? orden.accesorios.join(' · ') : 'Ninguno' }}</td>
+            </tr>
+            <tr *ngIf="orden.repuestosUsados && orden.repuestosUsados.length > 0" class="data-row">
+              <td class="label-cell">REPUESTOS:</td>
+              <td class="value-cell" colspan="3">
+                <span *ngFor="let r of orden.repuestosUsados; let i = index">
+                  {{ r.cantidad }}x {{ r.nombre }} (S/ {{ r.subtotal.toFixed(2) }}){{ i < orden.repuestosUsados.length - 1 ? ' · ' : '' }}
+                </span>
+              </td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">RESPONSABLE:</td>
+              <td class="value-cell">{{ orden.responsable || 'Pendiente' }}</td>
+              <td class="label-cell">F. ENTREGA:</td>
+              <td class="value-cell">{{ orden.fechaPrometida ? (orden.fechaPrometida | date:'dd/MM/yyyy') : 'Por definir' }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">SERVICIO:</td>
+              <td class="value-cell">{{ orden.tipoServicio }}</td>
+              <td class="label-cell">ADELANTO:</td>
+              <td class="value-cell">S/ {{ orden.adelanto.toFixed(2) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <!-- Firmas -->
-      <div class="grid grid-cols-2 gap-4 mt-4 items-end">
+      <!-- TOTALES DESTACADOS -->
+      <div class="totales-section">
+        <div class="total-row">
+          <span class="total-label">SUB-TOTAL:</span>
+          <span class="total-value">S/ {{ orden.subtotal.toFixed(2) }}</span>
+        </div>
+        <div class="total-row total-final">
+          <span class="total-label-final">SALDO A PAGAR:</span>
+          <span class="total-value-final">S/ {{ (orden.subtotal - orden.adelanto).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <!-- FIRMAS -->
+      <div class="grid grid-cols-2 gap-4 mt-5 items-end">
         <div class="text-center">
           <div class="border-t border-gray-400 pt-1">
-            <p class="text-[9px] text-tecrob-grayText">Recibí Conforme (Cliente)</p>
+            <p class="text-[9px] text-tecrob-grayText font-semibold">Recibí Conforme (Cliente)</p>
           </div>
         </div>
         <div class="flex items-center justify-end gap-2">
           <div class="text-center flex-1">
             <div class="border-t border-gray-400 pt-1">
-              <p class="text-[9px] text-tecrob-grayText">Firma Autorizada</p>
+              <p class="text-[9px] text-tecrob-grayText font-semibold">Firma Autorizada</p>
             </div>
           </div>
-          <div class="w-10 h-10 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-xs">
-            TR
-          </div>
+        </div>
+      </div>
+
+      <!-- 2 CÓDIGOS DE BARRAS ABAJO -->
+      <div class="flex justify-between items-end mt-4">
+        <div class="barcode-box">
+          <svg #barcode1></svg>
+        </div>
+        <div class="barcode-box">
+          <svg #barcode2></svg>
         </div>
       </div>
 
     </div>
 
     <!-- Línea de corte -->
-    <div class="my-2 text-center relative">
-      <div class="border-t-2 border-dashed border-gray-400 w-full"></div>
-      <span class="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-xs text-gray-500">
+    <div class="my-3 text-center relative">
+      <div class="border-t-2 border-dashed border-tecrob-red w-full"></div>
+      <span class="absolute left-1/2 -translate-x-1/2 -top-3 bg-white px-3 py-0.5 text-xs text-tecrob-red font-bold">
         ✂ CORTAR AQUÍ ✂
       </span>
     </div>
@@ -146,121 +149,121 @@
     <!-- ============================================
          COPIA 2: CLIENTE
     ============================================= -->
-    <div class="ticket-copy relative">
+    <div class="ticket-copy">
 
-      <!-- Franja superior -->
-      <div class="flex justify-between items-center bg-tecrob-red text-white px-3 py-1 text-xs">
-        <span class="font-bold">COMPROBANTE DEL CLIENTE</span>
+      <!-- Franja superior roja con borde redondeado -->
+      <div class="flex justify-between items-center bg-gradient-to-r from-tecrob-red to-tecrob-redDark text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md">
+        <span>COMPROBANTE DEL CLIENTE</span>
         <span>{{ orden.numOrden }}</span>
       </div>
 
-      <!-- Encabezado -->
-      <div class="flex justify-between items-start border-b-2 border-tecrob-red pb-2 mb-2 mt-2">
-        <div class="flex items-center gap-2">
-          <div class="w-12 h-12 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-lg">
-            TR
+      <!-- ENCABEZADO -->
+      <div class="mt-3 mb-3 flex items-center gap-3 border-b-2 border-tecrob-red pb-2">
+        <img src="assets/logo.png" alt="Logo TecRob" class="ticket-logo w-36 h-20 object-contain">
+        <div class="min-w-0 flex-1">
+          <div class="flex justify-between items-start">
+            <p class="text-[9px] text-tecrob-grayText">COL: 943582185 &nbsp;|&nbsp; luis&#64;tecrob.com &nbsp;|&nbsp; JR. LIBERTAD N 889A - AYACUCHO</p>
+            <p class="text-[9px] text-tecrob-grayText italic">F. Impresión: {{ orden.fechaIngreso | date:'dd/MM/yyyy' }}</p>
           </div>
-          <div>
-            <h1 class="text-sm font-bold text-tecrob-black">MULTISERVICIOS TECROB SVS E.I.R.L.</h1>
-            <p class="text-[9px] text-tecrob-grayText">COL: 943582185 | luis&#64;tecrob.com | JR. LIBERTAD N 889A - AYACUCHO</p>
-          </div>
-        </div>
-        <div class="text-right">
-          <p class="text-[9px] text-tecrob-grayText">F. Impresión: {{ orden.fechaIngreso | date:'dd/MM/yyyy HH:mm' }}</p>
         </div>
       </div>
 
-      <!-- QR -->
-      <div class="flex justify-center mb-2">
-        <canvas #qrCanvas2></canvas>
+      <!-- QR con marco decorativo -->
+      <div class="flex justify-center mb-3">
+        <div class="qr-frame">
+          <canvas #qrCanvas2></canvas>
+        </div>
       </div>
 
-      <!-- Tabla -->
-      <table class="w-full border-collapse text-[10px] mb-2">
-        <tbody>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">CLIENTE:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.cliente.nombre }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">DNI/RUC:</td>
-            <td class="py-1 px-2 w-[35%]">{{ orden.cliente.dni }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100 w-[15%]">TELÉFONO:</td>
-            <td class="py-1 px-2">{{ orden.cliente.telefono }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">DIRECCIÓN:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.cliente.direccion || 'No registrada' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">PRODUCTO:</td>
-            <td class="py-1 px-2">{{ orden.equipo.tipo }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">MARCA:</td>
-            <td class="py-1 px-2">{{ orden.equipo.marca }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">MODELO:</td>
-            <td class="py-1 px-2">{{ orden.equipo.modelo }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">SERIE:</td>
-            <td class="py-1 px-2">{{ orden.equipo.serie }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">DESCRIPCIÓN:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.equipo.descripcion || 'Sin descripción' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">ACCESORIOS:</td>
-            <td class="py-1 px-2" colspan="3">{{ orden.accesorios.length > 0 ? orden.accesorios.join(', ') : 'Ninguno' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">RESPONSABLE:</td>
-            <td class="py-1 px-2">{{ orden.responsable || 'Pendiente' }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">F. ENTREGA:</td>
-            <td class="py-1 px-2">{{ orden.fechaPrometida || 'Por definir' }}</td>
-          </tr>
-          <tr class="border-b border-gray-300">
-            <td class="py-1 px-2 font-bold bg-gray-100">SUB-TOTAL:</td>
-            <td class="py-1 px-2">S/ {{ orden.subtotal.toFixed(2) }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">ADELANTO:</td>
-            <td class="py-1 px-2">S/ {{ orden.adelanto.toFixed(2) }}</td>
-          </tr>
-          <tr>
-            <td class="py-1 px-2 font-bold bg-gray-100">SERVICIO:</td>
-            <td class="py-1 px-2">{{ orden.tipoServicio }}</td>
-            <td class="py-1 px-2 font-bold bg-gray-100">SALDO:</td>
-            <td class="py-1 px-2 font-bold text-tecrob-red">
-              S/ {{ (orden.subtotal - orden.adelanto).toFixed(2) }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- TABLA DE DATOS -->
+      <div class="data-section">
+        <table class="w-full text-[10px]">
+          <tbody>
+            <tr class="data-row">
+              <td class="label-cell w-[12%]">CLIENTE:</td>
+              <td class="value-cell w-[38%]">{{ orden.cliente.nombre }} <span class="text-tecrob-grayText">({{ orden.cliente.dni }})</span></td>
+              <td class="label-cell w-[12%]">TELÉFONO:</td>
+              <td class="value-cell">{{ orden.cliente.telefono }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">PRODUCTO:</td>
+              <td class="value-cell">{{ orden.equipo.tipo }}</td>
+              <td class="label-cell">MARCA:</td>
+              <td class="value-cell">{{ orden.equipo.marca }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">MODELO:</td>
+              <td class="value-cell">{{ orden.equipo.modelo }}</td>
+              <td class="label-cell">SERIE:</td>
+              <td class="value-cell">{{ orden.equipo.serie }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">DESCRIPCIÓN:</td>
+              <td class="value-cell" colspan="3">{{ orden.equipo.descripcion || 'Sin descripción' }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">ACCESORIOS:</td>
+              <td class="value-cell" colspan="3">{{ orden.accesorios.length > 0 ? orden.accesorios.join(' · ') : 'Ninguno' }}</td>
+            </tr>
+            <tr *ngIf="orden.repuestosUsados && orden.repuestosUsados.length > 0" class="data-row">
+              <td class="label-cell">REPUESTOS:</td>
+              <td class="value-cell" colspan="3">
+                <span *ngFor="let r of orden.repuestosUsados; let i = index">
+                  {{ r.cantidad }}x {{ r.nombre }} (S/ {{ r.subtotal.toFixed(2) }}){{ i < orden.repuestosUsados.length - 1 ? ' · ' : '' }}
+                </span>
+              </td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">RESPONSABLE:</td>
+              <td class="value-cell">{{ orden.responsable || 'Pendiente' }}</td>
+              <td class="label-cell">F. ENTREGA:</td>
+              <td class="value-cell">{{ orden.fechaPrometida ? (orden.fechaPrometida | date:'dd/MM/yyyy') : 'Por definir' }}</td>
+            </tr>
+            <tr class="data-row">
+              <td class="label-cell">SERVICIO:</td>
+              <td class="value-cell">{{ orden.tipoServicio }}</td>
+              <td class="label-cell">ADELANTO:</td>
+              <td class="value-cell">S/ {{ orden.adelanto.toFixed(2) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <!-- Firmas -->
-      <div class="grid grid-cols-2 gap-4 mt-4 items-end">
+      <!-- TOTALES DESTACADOS -->
+      <div class="totales-section">
+        <div class="total-row">
+          <span class="total-label">SUB-TOTAL:</span>
+          <span class="total-value">S/ {{ orden.subtotal.toFixed(2) }}</span>
+        </div>
+        <div class="total-row total-final">
+          <span class="total-label-final">SALDO A PAGAR:</span>
+          <span class="total-value-final">S/ {{ (orden.subtotal - orden.adelanto).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <!-- FIRMAS -->
+      <div class="grid grid-cols-2 gap-4 mt-5 items-end">
         <div class="text-center">
           <div class="border-t border-gray-400 pt-1">
-            <p class="text-[9px] text-tecrob-grayText">Recibí Conforme (Cliente)</p>
+            <p class="text-[9px] text-tecrob-grayText font-semibold">Recibí Conforme (Cliente)</p>
           </div>
         </div>
         <div class="flex items-center justify-end gap-2">
           <div class="text-center flex-1">
             <div class="border-t border-gray-400 pt-1">
-              <p class="text-[9px] text-tecrob-grayText">Firma Autorizada</p>
+              <p class="text-[9px] text-tecrob-grayText font-semibold">Firma Autorizada</p>
             </div>
-          </div>
-          <div class="w-10 h-10 bg-tecrob-red rounded flex items-center justify-center text-white font-bold text-xs">
-            TR
           </div>
         </div>
       </div>
 
-      <!-- BARRA INFERIOR DERECHA (2 barras con cuadro punteado) -->
-      <div class="barcode-bottom-right">
-        <div class="barcode-box mb-1">
-          <svg #barcode2></svg>
-        </div>
+      <!-- 2 CÓDIGOS DE BARRAS ABAJO -->
+      <div class="flex justify-between items-end mt-4">
         <div class="barcode-box">
           <svg #barcode3></svg>
+        </div>
+        <div class="barcode-box">
+          <svg #barcode4></svg>
         </div>
       </div>
 

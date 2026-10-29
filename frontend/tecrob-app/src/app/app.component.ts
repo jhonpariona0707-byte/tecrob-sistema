@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { TopbarComponent } from './layout/topbar/topbar.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { FooterComponent } from './layout/footer/footer.component';
+import { ApiService } from './core/services/api.service';
 
 @Component({
   selector: 'app-root',
@@ -20,4 +21,6 @@ import { FooterComponent } from './layout/footer/footer.component';
 })
 export class AppComponent {
   title = 'tecrob-app';
+
+  constructor(readonly api: ApiService) {}
 }

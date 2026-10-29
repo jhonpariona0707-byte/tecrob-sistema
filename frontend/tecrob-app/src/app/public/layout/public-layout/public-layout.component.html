@@ -1,0 +1,202 @@
+<div class="min-h-screen flex flex-col bg-gray-50">
+
+  <!-- HEADER PÚBLICO -->
+  <header class="bg-tecrob-black text-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-3 flex items-center justify-between flex-wrap gap-3">
+      
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center text-white no-underline">
+        <img src="assets/logo.png" alt="Logo TecRob" class="w-36 h-20 object-contain">
+      </a>
+
+      <!-- Menú -->
+      <nav class="hidden md:flex items-center gap-6">
+        <a routerLink="/" routerLinkActive="text-tecrob-red" 
+           [routerLinkActiveOptions]="{exact: true}"
+           class="text-tecrob-grayLight hover:text-tecrob-red transition-all text-sm font-medium no-underline">
+          Inicio
+        </a>
+        <div class="relative menu-container">
+          <button type="button"
+                  (click)="toggleCatalogo($event)"
+                  [attr.aria-expanded]="menuCatalogoAbierto"
+                  aria-haspopup="true"
+                  aria-controls="menu-catalogo"
+                  class="flex cursor-pointer items-center gap-1 border-0 bg-transparent text-sm font-medium text-tecrob-grayLight transition-all hover:text-tecrob-red">
+            Catálogo
+            <svg class="h-4 w-4 transition-transform duration-200"
+                 [class.rotate-180]="menuCatalogoAbierto"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <div *ngIf="menuCatalogoAbierto"
+               id="menu-catalogo"
+               class="animate-fade-in-down absolute left-0 top-full z-50 mt-2 max-h-[75vh] w-64 overflow-y-auto rounded border border-gray-100 bg-white text-tecrob-black shadow-2xl">
+            <div class="flex items-center gap-2 border-l-4 border-orange-500 bg-gray-50 px-4 py-2">
+              <span class="text-blue-500" aria-hidden="true">📦</span>
+              <h2 class="text-sm font-bold uppercase text-gray-800">Categorías</h2>
+            </div>
+            <ul class="py-2">
+              <li *ngFor="let categoria of categoriasCatalogo">
+                <a [routerLink]="['/productos']"
+                   [queryParams]="{ categoria: categoria.categoria }"
+                   (click)="cerrarMenus()"
+                   class="block px-6 py-2 text-sm text-gray-600 transition-all hover:bg-gray-50 hover:text-tecrob-red">
+                  {{ categoria.nombre }}
+                </a>
+              </li>
+            </ul>
+
+            <div class="flex items-center gap-2 border-l-4 border-orange-500 bg-gray-50 px-4 py-2">
+              <span class="text-blue-500" aria-hidden="true">🔎</span>
+              <h2 class="text-sm font-bold uppercase text-gray-800">Herramientas</h2>
+            </div>
+            <ul class="py-2">
+              <li *ngFor="let herramienta of herramientasCatalogo">
+                <a [routerLink]="herramienta.link"
+                   (click)="cerrarMenus()"
+                   class="block px-6 py-2 text-sm text-gray-600 transition-all hover:bg-gray-50 hover:text-tecrob-red">
+                  {{ herramienta.nombre }}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <a routerLink="/consulta" routerLinkActive="text-tecrob-red"
+           class="text-tecrob-grayLight hover:text-tecrob-red transition-all text-sm font-medium no-underline">
+          Servicio Técnico
+        </a>
+
+        <div class="relative menu-container">
+          <button type="button"
+                  (click)="toggleNosotros($event)"
+                  [attr.aria-expanded]="menuNosotrosAbierto"
+                  aria-haspopup="true"
+                  aria-controls="menu-nosotros"
+                  class="flex cursor-pointer items-center gap-1 border-0 bg-transparent text-sm font-medium text-tecrob-grayLight transition-all hover:text-tecrob-red">
+            Nosotros
+            <svg class="h-4 w-4 transition-transform duration-200"
+                 [class.rotate-180]="menuNosotrosAbierto"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div *ngIf="menuNosotrosAbierto"
+               id="menu-nosotros"
+               class="animate-fade-in-down absolute right-0 top-full z-50 mt-2 w-56 rounded border border-gray-100 bg-white text-tecrob-black shadow-2xl">
+            <ul class="py-2">
+              <li>
+                <a href="#contacto" (click)="cerrarMenus()"
+                   class="block px-6 py-2 text-sm text-gray-600 transition-all hover:bg-gray-50 hover:text-tecrob-red">Grupo TecRob</a>
+              </li>
+              <li>
+                <a href="#contacto" (click)="cerrarMenus()"
+                   class="block px-6 py-2 text-sm text-gray-600 transition-all hover:bg-gray-50 hover:text-tecrob-red">Sucursales</a>
+              </li>
+              <li>
+                <a href="#contacto" (click)="cerrarMenus()"
+                   class="block px-6 py-2 text-sm text-gray-600 transition-all hover:bg-gray-50 hover:text-tecrob-red">Contáctenos</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <a href="#contacto"
+           class="text-tecrob-grayLight hover:text-tecrob-red transition-all text-sm font-medium no-underline">
+          Contacto
+        </a>
+      </nav>
+
+      <!-- Botones -->
+      <div class="flex items-center gap-3">
+        <a [href]="whatsappLink()" target="_blank"
+           class="hidden sm:flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold no-underline transition-all">
+          📱 WhatsApp
+        </a>
+        <a routerLink="/login"
+           class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-4 py-2 rounded-lg text-sm font-bold no-underline transition-all">
+          🔐 Admin
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO -->
+  <main class="flex-1">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="contacto" class="bg-tecrob-black text-tecrob-grayLight">
+    <div class="container mx-auto px-6 py-12">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div>
+          <div class="mb-4">
+            <img src="assets/logo.png" alt="Logo TecRob" class="w-40 h-24 object-contain">
+          </div>
+          <p class="text-sm text-tecrob-grayMid leading-relaxed">
+            Servicio técnico profesional en reparación y venta de computadoras, 
+            accesorios y suministros en Ayacucho.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white mb-4">📞 Contacto</h4>
+          <ul class="space-y-2 text-sm">
+            <li>📱 943582185 / 996504233</li>
+            <li>✉️ luis&#64;tecrob.com</li>
+            <li>📍 JR. LIBERTAD N 889A - AYACUCHO</li>
+          </ul>
+          
+          <a [href]="whatsappLink()" target="_blank"
+             class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold mt-4 no-underline transition-all">
+            📱 Escríbenos por WhatsApp
+          </a>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white mb-4">🔗 Enlaces</h4>
+          <ul class="space-y-2 text-sm">
+            <li>
+              <a routerLink="/" class="text-tecrob-grayMid hover:text-tecrob-red no-underline transition-all">
+                Inicio
+              </a>
+            </li>
+            <li>
+              <a routerLink="/productos" class="text-tecrob-grayMid hover:text-tecrob-red no-underline transition-all">
+                Productos
+              </a>
+            </li>
+            <li>
+              <a routerLink="/consulta" class="text-tecrob-grayMid hover:text-tecrob-red no-underline transition-all">
+                Consultar Reparación
+              </a>
+            </li>
+            <li>
+              <a routerLink="/login" class="text-tecrob-grayMid hover:text-tecrob-red no-underline transition-all">
+                Panel Admin
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="border-t border-gray-700 mt-8 pt-6 text-center text-xs text-tecrob-grayMid">
+        <p>© 2026 TecRob - Todos los derechos reservados</p>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- BOTÓN WHATSAPP FLOTANTE -->
+  <a [href]="whatsappLink()" target="_blank"
+     class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full shadow-2xl flex items-center justify-center text-white text-3xl z-50 transition-all hover:scale-110 no-underline">
+    💬
+  </a>
+
+</div>

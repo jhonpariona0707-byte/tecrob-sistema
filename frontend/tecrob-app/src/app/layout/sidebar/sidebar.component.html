@@ -6,57 +6,67 @@
 
   <nav class="flex-1 px-3 py-4 space-y-1">
     
-    <a routerLink="/dashboard" routerLinkActive="bg-tecrob-red" 
+    <a routerLink="/admin/dashboard" routerLinkActive="bg-tecrob-red" 
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">📊</span>
       <span>Dashboard</span>
     </a>
 
-    <a routerLink="/clientes" routerLinkActive="bg-tecrob-red"
+    <a *ngIf="esAdmin" routerLink="/admin/clientes" routerLinkActive="bg-tecrob-red"
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">👥</span>
       <span>Clientes</span>
     </a>
 
-    <a routerLink="/equipos" routerLinkActive="bg-tecrob-red"
+    <a routerLink="/admin/equipos" routerLinkActive="bg-tecrob-red"
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">💻</span>
       <span>Equipos</span>
     </a>
 
-    <a routerLink="/ordenes" routerLinkActive="bg-tecrob-red"
+    <a routerLink="/admin/ordenes" routerLinkActive="bg-tecrob-red"
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">🔧</span>
-      <span>Órdenes de Servicio</span>
+      <span>Generar Orden</span>
+    </a>
+
+    <a routerLink="/admin/seguimiento" routerLinkActive="bg-tecrob-red"
+       class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
+      <span class="text-lg">📍</span>
+      <span>Seguimiento</span>
     </a>
 
     <div class="pt-3 mt-3 border-t border-gray-700">
       <p class="text-xs uppercase tracking-wider text-tecrob-grayText font-bold px-4 pb-2">Inventario</p>
     </div>
 
-    <a routerLink="/repuestos" routerLinkActive="bg-tecrob-red"
+    <a routerLink="/admin/repuestos" routerLinkActive="bg-tecrob-red"
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">🔩</span>
       <span>Repuestos</span>
     </a>
 
-    <a routerLink="/productos" routerLinkActive="bg-tecrob-red"
+    <a *ngIf="esAdmin" routerLink="/admin/productos" routerLinkActive="bg-tecrob-red"
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">📦</span>
       <span>Productos</span>
     </a>
 
-    <div class="pt-3 mt-3 border-t border-gray-700">
+    <div *ngIf="esAdmin" class="pt-3 mt-3 border-t border-gray-700">
       <p class="text-xs uppercase tracking-wider text-tecrob-grayText font-bold px-4 pb-2">Ventas</p>
     </div>
 
-    <a routerLink="/carrito" routerLinkActive="bg-tecrob-red"
+    <a *ngIf="esAdmin" routerLink="/admin/carrito" routerLinkActive="bg-tecrob-red"
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">🛒</span>
       <span>Carrito</span>
+      <span *ngIf="totalCarrito > 0" 
+            class="ml-auto bg-tecrob-red text-white text-xs font-bold rounded-full px-2 py-0.5">
+        {{ totalCarrito }}
+      </span>
     </a>
 
-    <a routerLink="/ventas" routerLinkActive="bg-tecrob-red"
+    <a *ngIf="esAdmin" routerLink="/admin/ventas" routerLinkActive="bg-tecrob-red"
        class="text-inherit no-underline flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-tecrob-red transition-all text-sm font-medium cursor-pointer">
       <span class="text-lg">🧾</span>
       <span>Ventas</span>

@@ -1,15 +1,243 @@
 <div class="space-y-6">
+
+  <!-- Encabezado -->
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold text-tecrob-black">🔩 Repuestos</h1>
-      <p class="text-tecrob-grayText mt-1">Inventario de repuestos TecRob</p>
+      <p class="text-tecrob-grayText mt-1">Inventario de repuestos para reparaciones</p>
     </div>
-    <button class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg">
+    <button *ngIf="esAdmin" (click)="abrirModalNuevo()"
+            class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
       + Nuevo Repuesto
     </button>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-lg p-8 text-center text-tecrob-grayText">
-    Módulo de repuestos en construcción
+  <!-- Mensaje -->
+  <div *ngIf="mensaje" 
+       [class.bg-green-100]="mensaje.tipo === 'success'"
+       [class.border-green-500]="mensaje.tipo === 'success'"
+       [class.text-green-700]="mensaje.tipo === 'success'"
+       [class.bg-red-100]="mensaje.tipo === 'error'"
+       [class.border-red-500]="mensaje.tipo === 'error'"
+       [class.text-red-700]="mensaje.tipo === 'error'"
+       class="border-l-4 p-4 rounded-lg">
+    {{ mensaje.texto }}
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-2xl shadow-lg p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="md:col-span-2 flex items-center gap-3">
+        <span class="text-2xl">🔍</span>
+        <input type="text"
+               [(ngModel)]="buscar"
+               (ngModelChange)="filtrar()"
+               placeholder="Buscar por nombre o código..."
+               class="flex-1 px-4 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+      </div>
+      <div>
+        <select [(ngModel)]="categoriaFiltro"
+                (ngModelChange)="filtrar()"
+                class="w-full px-4 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+          <option value="">Todas las categorías</option>
+          <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid de Repuestos -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+    <div *ngFor="let r of (repuestosFiltrados | slice:(pagina - 1) * filasPorPagina:pagina * filasPorPagina)"
+         class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all border border-gray-100 hover:border-tecrob-red">
+
+      <!-- Imagen -->
+      <div class="bg-gradient-to-br from-gray-700 to-tecrob-black h-40 flex items-center justify-center relative">
+        <span class="text-6xl">🔩</span>
+
+        <!-- Etiqueta stock -->
+        <span *ngIf="sinStock(r)"
+              class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+          AGOTADO
+        </span>
+        <span *ngIf="stockBajo(r)"
+              class="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
+          ¡ÚLTIMAS {{ r.stock }}!
+        </span>
+        <span *ngIf="!sinStock(r) && !stockBajo(r)"
+              class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+          DISPONIBLE
+        </span>
+
+        <!-- Categoría -->
+        <span class="absolute top-2 right-2 bg-tecrob-red text-white text-xs px-2 py-1 rounded">
+          {{ r.categoria }}
+        </span>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="p-4">
+        <p class="text-xs text-tecrob-grayText mb-1">{{ r.codigo }}</p>
+        <h3 class="font-bold text-tecrob-black text-sm mb-1 leading-tight">
+          {{ r.nombre }}
+        </h3>
+        <p class="text-xs text-tecrob-grayText mb-3 line-clamp-2">
+          {{ r.descripcion || 'Sin descripción' }}
+        </p>
+
+        <!-- Precio y stock -->
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <p class="text-xl font-bold text-tecrob-red">S/ {{ r.precioVenta.toFixed(2) }}</p>
+            <p class="text-xs text-tecrob-grayText">Stock: {{ r.stock }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="r.ubicacion" class="text-xs text-tecrob-grayText mb-3">
+          📍 {{ r.ubicacion }}
+        </div>
+
+        <!-- Botones admin -->
+        <div *ngIf="esAdmin" class="flex gap-1">
+          <button (click)="abrirModalEditar(r)"
+                  class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs py-1 rounded">
+            ✏ Editar
+          </button>
+          <button (click)="eliminar(r)"
+                  class="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs py-1 rounded">
+            🗑 Eliminar
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sin repuestos -->
+    <div *ngIf="repuestosFiltrados.length === 0" class="col-span-full">
+      <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <p class="text-5xl mb-4">🔩</p>
+        <p class="text-tecrob-grayText">
+          {{ buscar || categoriaFiltro ? 'No se encontraron repuestos con esos filtros' : 'Aún no hay repuestos registrados' }}
+        </p>
+      </div>
+    </div>
+
+  </div>
+  <app-pagination *ngIf="repuestosFiltrados.length > 0"
+                  [totalItems]="repuestosFiltrados.length"
+                  [currentPage]="pagina"
+                  [pageSize]="filasPorPagina"
+                  (pageChange)="pagina = $event"
+                  (pageSizeChange)="filasPorPagina = $event; pagina = 1">
+  </app-pagination>
+
+</div>
+
+<!-- =============================================
+     MODAL REPUESTO
+============================================== -->
+<div *ngIf="mostrarModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+    <div class="bg-gradient-to-r from-tecrob-black to-tecrob-blackSoft text-white px-6 py-4 flex justify-between items-center">
+      <h2 class="text-xl font-bold">
+        {{ modoEdicion ? '✏ Editar Repuesto' : '+ Nuevo Repuesto' }}
+      </h2>
+      <button (click)="cerrarModal()" class="text-white text-2xl hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center">
+        ✕
+      </button>
+    </div>
+
+    <div class="p-6 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Código *</label>
+          <input type="text" [(ngModel)]="repuestoForm.codigo" placeholder="REP-001"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Categoría</label>
+          <select [(ngModel)]="repuestoForm.categoria"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option *ngFor="let c of categorias" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Nombre *</label>
+          <input type="text" [(ngModel)]="repuestoForm.nombre" placeholder="Disco Duro 1TB SATA"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Descripción</label>
+          <textarea [(ngModel)]="repuestoForm.descripcion" rows="2" placeholder="Descripción del repuesto"
+                    class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Precio Compra</label>
+          <input type="number" step="0.01" [(ngModel)]="repuestoForm.precioCompra" placeholder="0.00"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Precio Venta *</label>
+          <input type="number" step="0.01" [(ngModel)]="repuestoForm.precioVenta" placeholder="0.00"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Stock</label>
+          <input type="number" [(ngModel)]="repuestoForm.stock" placeholder="0"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Stock Mínimo</label>
+          <input type="number" [(ngModel)]="repuestoForm.stockMinimo" placeholder="3"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Proveedor</label>
+          <input type="text" [(ngModel)]="repuestoForm.proveedor" placeholder="Nombre del proveedor"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Ubicación</label>
+          <input type="text" [(ngModel)]="repuestoForm.ubicacion" placeholder="Estante A-1"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+      </div>
+
+      <div *ngIf="mensaje" 
+           [class.bg-green-100]="mensaje.tipo === 'success'"
+           [class.text-green-700]="mensaje.tipo === 'success'"
+           [class.bg-red-100]="mensaje.tipo === 'error'"
+           [class.text-red-700]="mensaje.tipo === 'error'"
+           class="border-l-4 p-3 rounded-lg text-sm"
+           [class.border-green-500]="mensaje.tipo === 'success'"
+           [class.border-red-500]="mensaje.tipo === 'error'">
+        {{ mensaje.texto }}
+      </div>
+    </div>
+
+    <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
+      <button (click)="cerrarModal()"
+              class="bg-tecrob-grayMid text-tecrob-black px-6 py-2 rounded-lg font-semibold hover:bg-tecrob-grayText transition-all">
+        Cancelar
+      </button>
+      <button (click)="guardar()"
+              class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-2 rounded-lg font-bold shadow-lg">
+        {{ modoEdicion ? '💾 Actualizar' : '💾 Guardar' }}
+      </button>
+    </div>
+
   </div>
 </div>

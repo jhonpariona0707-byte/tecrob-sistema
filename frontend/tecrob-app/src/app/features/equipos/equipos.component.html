@@ -1,15 +1,229 @@
 <div class="space-y-6">
+
+  <!-- Encabezado -->
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold text-tecrob-black">💻 Equipos</h1>
       <p class="text-tecrob-grayText mt-1">Equipos de los clientes de TecRob</p>
     </div>
-    <button class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg">
+    <button (click)="abrirModalNuevo()"
+            class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
       + Nuevo Equipo
     </button>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-lg p-8 text-center text-tecrob-grayText">
-    Módulo de equipos en construcción
+  <!-- Mensaje -->
+  <div *ngIf="mensaje" 
+       [class.bg-green-100]="mensaje.tipo === 'success'"
+       [class.border-green-500]="mensaje.tipo === 'success'"
+       [class.text-green-700]="mensaje.tipo === 'success'"
+       [class.bg-red-100]="mensaje.tipo === 'error'"
+       [class.border-red-500]="mensaje.tipo === 'error'"
+       [class.text-red-700]="mensaje.tipo === 'error'"
+       class="border-l-4 p-4 rounded-lg">
+    {{ mensaje.texto }}
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-2xl shadow-lg p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="md:col-span-2 flex items-center gap-3">
+        <span class="text-2xl">🔍</span>
+        <input type="text"
+               [(ngModel)]="buscar"
+               (ngModelChange)="filtrar()"
+               placeholder="Buscar por marca, modelo, serie o cliente..."
+               class="flex-1 px-4 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+      </div>
+      <div>
+        <select [(ngModel)]="clienteFiltro"
+                (ngModelChange)="filtrar()"
+                class="w-full px-4 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+          <option [ngValue]="null">Todos los clientes</option>
+          <option *ngFor="let c of clientes" [ngValue]="c.id">
+            {{ c.nombre }} {{ c.apellidos }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid de Equipos -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+    <div *ngFor="let e of (equiposFiltrados | slice:(pagina - 1) * filasPorPagina:pagina * filasPorPagina)"
+         class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all border border-gray-100 hover:border-tecrob-red">
+
+      <div class="bg-gradient-to-br from-tecrob-black to-tecrob-blackSoft h-32 flex items-center justify-center relative">
+        <span class="text-6xl">💻</span>
+        <span class="absolute top-2 left-2 bg-tecrob-red text-white text-xs font-bold px-2 py-1 rounded">
+          {{ e.tipo }}
+        </span>
+        <span class="absolute top-2 right-2 bg-white text-tecrob-black text-xs font-bold px-2 py-1 rounded">
+          {{ contarOrdenes(e) }} órdenes
+        </span>
+      </div>
+
+      <div class="p-4">
+        <p class="text-xs text-tecrob-grayText mb-1">Serie: {{ e.serie || 'Sin serie' }}</p>
+        <h3 class="font-bold text-tecrob-black text-sm mb-2 leading-tight">
+          {{ e.marca }} {{ e.modelo }}
+        </h3>
+        <p class="text-xs text-tecrob-grayText mb-2 line-clamp-2">
+          {{ e.caracteristicas || 'Sin características' }}
+        </p>
+
+        <div class="bg-gray-50 rounded p-2 mb-3">
+          <p class="text-[10px] text-tecrob-grayText">Cliente:</p>
+          <p class="text-xs font-semibold text-tecrob-black">{{ e.clienteNombre }}</p>
+          <p class="text-[10px] text-tecrob-grayText">{{ e.clienteDocumento }}</p>
+        </div>
+
+        <p *ngIf="e.accesorios" class="text-[10px] text-tecrob-grayText mb-3">
+          🎒 {{ e.accesorios }}
+        </p>
+
+        <div class="flex gap-1">
+          <button (click)="abrirModalEditar(e)"
+                  class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs py-1 rounded">
+            ✏ Editar
+          </button>
+          <button *ngIf="esAdmin" (click)="eliminar(e)"
+                  class="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs py-1 rounded">
+            🗑 Eliminar
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div *ngIf="equiposFiltrados.length === 0" class="col-span-full">
+      <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <p class="text-5xl mb-4">💻</p>
+        <p class="text-tecrob-grayText">
+          {{ buscar || clienteFiltro ? 'No se encontraron equipos con esos filtros' : 'Aún no hay equipos registrados' }}
+        </p>
+      </div>
+    </div>
+
+  </div>
+  <app-pagination *ngIf="equiposFiltrados.length > 0"
+                  [totalItems]="equiposFiltrados.length"
+                  [currentPage]="pagina"
+                  [pageSize]="filasPorPagina"
+                  (pageChange)="pagina = $event"
+                  (pageSizeChange)="filasPorPagina = $event; pagina = 1">
+  </app-pagination>
+
+</div>
+
+<!-- MODAL EQUIPO -->
+<div *ngIf="mostrarModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+
+    <div class="bg-gradient-to-r from-tecrob-black to-tecrob-blackSoft text-white px-6 py-4 flex justify-between items-center">
+      <h2 class="text-xl font-bold">
+        {{ modoEdicion ? '✏ Editar Equipo' : '+ Nuevo Equipo' }}
+      </h2>
+      <button (click)="cerrarModal()" class="text-white text-2xl hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center">
+        ✕
+      </button>
+    </div>
+
+    <div class="p-6 space-y-4">
+      
+      <div>
+        <label class="block text-sm font-semibold text-tecrob-black mb-1">Cliente *</label>
+        <select [(ngModel)]="equipoForm.clienteId"
+                (ngModelChange)="onClienteChange($event)"
+                class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+          <option [ngValue]="0">— Seleccionar cliente —</option>
+          <option *ngFor="let c of clientes" [ngValue]="c.id">
+            {{ c.nombre }} {{ c.apellidos }} - {{ c.numDocumento }}
+          </option>
+        </select>
+        <p *ngIf="clientes.length === 0" class="text-xs text-tecrob-red mt-1">
+          No hay clientes. <a routerLink="/admin/clientes" class="underline">Registra uno primero</a>
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Tipo de Equipo</label>
+          <select [(ngModel)]="equipoForm.tipo"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option *ngFor="let t of tiposEquipo" [value]="t">{{ t }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Marca *</label>
+          <input type="text" [(ngModel)]="equipoForm.marca"
+                 placeholder="HP, Lenovo, ASUS..."
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Modelo *</label>
+          <input type="text" [(ngModel)]="equipoForm.modelo"
+                 placeholder="250 G7, IdeaPad 3..."
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Serie</label>
+          <input type="text" [(ngModel)]="equipoForm.serie"
+                 placeholder="CN02B687"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Características</label>
+          <textarea [(ngModel)]="equipoForm.caracteristicas" rows="2"
+                    placeholder="Procesador i5, 8GB RAM, SSD 256GB..."
+                    class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Contraseña</label>
+          <input type="text" [(ngModel)]="equipoForm.contrasena"
+                 placeholder="Si aplica"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Accesorios</label>
+          <input type="text" [(ngModel)]="equipoForm.accesorios"
+                 placeholder="Cargador, mouse, funda..."
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+      </div>
+
+      <div *ngIf="mensaje" 
+           [class.bg-green-100]="mensaje.tipo === 'success'"
+           [class.text-green-700]="mensaje.tipo === 'success'"
+           [class.bg-red-100]="mensaje.tipo === 'error'"
+           [class.text-red-700]="mensaje.tipo === 'error'"
+           class="border-l-4 p-3 rounded-lg text-sm"
+           [class.border-green-500]="mensaje.tipo === 'success'"
+           [class.border-red-500]="mensaje.tipo === 'error'">
+        {{ mensaje.texto }}
+      </div>
+
+    </div>
+
+    <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
+      <button (click)="cerrarModal()"
+              class="bg-tecrob-grayMid text-tecrob-black px-6 py-2 rounded-lg font-semibold hover:bg-tecrob-grayText transition-all">
+        Cancelar
+      </button>
+      <button (click)="guardar()"
+              class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-2 rounded-lg font-bold shadow-lg">
+        {{ modoEdicion ? '💾 Actualizar' : '💾 Guardar' }}
+      </button>
+    </div>
+
   </div>
 </div>

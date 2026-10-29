@@ -1,0 +1,90 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-tecrob-black">Seguimiento de órdenes</h1>
+    <p class="mt-1 text-tecrob-grayText">Actualiza el estado y consulta el historial de cada reparación.</p>
+  </div>
+
+  <div *ngIf="mensaje" class="rounded-lg border border-green-300 bg-green-50 p-4 text-green-800" role="status">
+    {{ mensaje }}
+  </div>
+  <div *ngIf="error" class="rounded-lg border border-red-300 bg-red-50 p-4 text-red-800" role="alert">
+    {{ error }}
+  </div>
+  <div *ngIf="cargando" class="rounded-xl bg-white p-6 text-tecrob-grayText shadow">
+    Cargando órdenes...
+  </div>
+
+  <ng-container *ngIf="!cargando">
+    <section *ngIf="ordenes.length === 0 && !error" class="rounded-2xl bg-white p-8 text-center text-tecrob-grayText shadow">
+      No hay órdenes para mostrar.
+    </section>
+
+    <ng-container *ngIf="ordenes.length > 0">
+      <section class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div class="rounded-2xl bg-white p-6 shadow-lg">
+          <label for="orden" class="mb-2 block text-sm font-semibold text-tecrob-black">Orden de servicio</label>
+          <select id="orden" [(ngModel)]="numeroSeleccionado" (ngModelChange)="seleccionarOrden($event)"
+                  class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 focus:border-tecrob-red focus:outline-none">
+            <option *ngFor="let orden of ordenes" [value]="orden.numOrden">
+              {{ orden.numOrden }} · {{ orden.cliente.nombre }} · {{ orden.estado }}
+            </option>
+          </select>
+
+          <ng-container *ngIf="ordenSeleccionada as orden">
+            <div class="mt-5 space-y-2 border-t pt-4 text-sm">
+              <p><span class="font-semibold">Cliente:</span> {{ orden.cliente.nombre }}</p>
+              <p><span class="font-semibold">Equipo:</span> {{ orden.equipo.marca }} {{ orden.equipo.modelo }}</p>
+              <p><span class="font-semibold">Estado actual:</span> {{ orden.estado }}</p>
+            </div>
+
+            <form (ngSubmit)="guardarEstado()" class="mt-6 space-y-4 border-t pt-5">
+              <div>
+                <label for="nuevoEstado" class="mb-2 block text-sm font-semibold text-tecrob-black">Nuevo estado</label>
+                <select id="nuevoEstado" name="nuevoEstado" [(ngModel)]="nuevoEstado"
+                        class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 focus:border-tecrob-red focus:outline-none">
+                  <option *ngFor="let estado of estados" [value]="estado">{{ estado }}</option>
+                </select>
+              </div>
+              <div>
+                <label for="comentario" class="mb-2 block text-sm font-semibold text-tecrob-black">
+                  Comentario para el historial <span class="font-normal text-gray-500">(opcional)</span>
+                </label>
+                <textarea id="comentario" name="comentario" [(ngModel)]="comentario" maxlength="1000" rows="3"
+                          placeholder="Describe brevemente el trabajo realizado o el motivo del cambio."
+                          class="w-full rounded-lg border-2 border-gray-200 px-3 py-2 focus:border-tecrob-red focus:outline-none"></textarea>
+                <p class="mt-1 text-right text-xs text-gray-500">{{ comentario.length }}/1000</p>
+              </div>
+              <button type="submit" [disabled]="guardando || nuevoEstado === orden.estado"
+                      class="w-full rounded-lg bg-tecrob-red px-4 py-3 font-bold text-white transition hover:bg-tecrob-redDark disabled:cursor-not-allowed disabled:bg-gray-400">
+                {{ guardando ? 'Guardando...' : 'Guardar actualización' }}
+              </button>
+            </form>
+          </ng-container>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 shadow-lg">
+          <h2 class="mb-5 text-xl font-bold text-tecrob-black">Historial de cambios</h2>
+          <ng-container *ngIf="ordenSeleccionada as orden">
+            <ol *ngIf="orden.seguimiento?.length; else sinEventos" class="relative ml-2 border-l-2 border-gray-200">
+              <li *ngFor="let evento of orden.seguimiento" class="relative ml-6 pb-6 last:pb-0">
+                <span class="absolute -left-[2.05rem] flex h-4 w-4 rounded-full border-2 border-white bg-tecrob-red"></span>
+                <p class="font-semibold text-tecrob-black">
+                  {{ evento.estadoAnterior ? evento.estadoAnterior + ' → ' : '' }}{{ evento.estado }}
+                </p>
+                <p class="mt-1 text-xs text-tecrob-grayText">
+                  {{ evento.fecha | date:'dd/MM/yyyy HH:mm' }} · {{ evento.responsable }}
+                </p>
+                <p *ngIf="evento.comentario" class="mt-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
+                  {{ evento.comentario }}
+                </p>
+              </li>
+            </ol>
+          </ng-container>
+          <ng-template #sinEventos>
+            <p class="text-sm text-tecrob-grayText">Esta orden aún no tiene eventos de seguimiento.</p>
+          </ng-template>
+        </div>
+      </section>
+    </ng-container>
+  </ng-container>
+</div>

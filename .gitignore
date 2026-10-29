@@ -1,10 +1,16 @@
 # ===== Java / Spring Boot =====
 backend/target/
+backend/backups/
+backend/uploads/
 *.class
 *.jar
 .mvn/
 mvnw
 mvnw.cmd
+!backend/.mvn/
+!backend/.mvn/wrapper/
+!backend/mvnw
+!backend/mvnw.cmd
 
 # ===== Node / Angular =====
 frontend/node_modules/

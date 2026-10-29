@@ -26,7 +26,6 @@ export class LoginComponent {
   onSubmit(): void {
     this.error = '';
 
-    // Validación básica
     if (!this.email || !this.password) {
       this.error = 'Por favor, completa todos los campos';
       return;
@@ -34,17 +33,15 @@ export class LoginComponent {
 
     this.cargando = true;
 
-    // Simular delay de red (para que se vea profesional)
-    setTimeout(() => {
-      const resultado = this.authService.login(this.email, this.password);
-
-      if (resultado.success) {
-        // Login exitoso → ir al dashboard
-        this.router.navigate(['/dashboard']);
-      } else {
-        this.error = resultado.mensaje || 'Error al iniciar sesión';
+    this.authService.login(this.email, this.password).subscribe({
+      next: () => {
+        // Login exitoso, redirigir al dashboard
+        this.router.navigate(['/admin/dashboard']);
+      },
+      error: (err) => {
+        this.error = '❌ Correo o contraseña incorrectos';
         this.cargando = false;
       }
-    }, 500);
+    });
   }
 }

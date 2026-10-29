@@ -16,9 +16,11 @@ export class TicketComponent implements OnInit, AfterViewInit {
 
   @ViewChild('qrCanvas') qrCanvas!: ElementRef;
   @ViewChild('qrCanvas2') qrCanvas2!: ElementRef;
+
   @ViewChild('barcode1') barcode1!: ElementRef;
   @ViewChild('barcode2') barcode2!: ElementRef;
   @ViewChild('barcode3') barcode3!: ElementRef;
+  @ViewChild('barcode4') barcode4!: ElementRef;
 
   orden: Orden | undefined;
 
@@ -31,7 +33,15 @@ export class TicketComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     const numOrden = this.route.snapshot.paramMap.get('numOrden');
     if (numOrden) {
-      this.orden = this.ordenesService.getOrdenPorNumero(numOrden);
+      this.ordenesService.buscarOrdenPorNumero(numOrden).subscribe(orden => {
+        this.orden = orden ?? undefined;
+        if (this.orden) {
+          setTimeout(() => {
+            this.generarQRs();
+            this.generarCodigosBarras();
+          }, 200);
+        }
+      });
     }
   }
 
@@ -49,10 +59,10 @@ export class TicketComponent implements OnInit, AfterViewInit {
       const texto = `TecRob | Orden: ${this.orden.numOrden} | Cliente: ${this.orden.cliente.nombre}`;
 
       if (this.qrCanvas) {
-        await QRCode.toCanvas(this.qrCanvas.nativeElement, texto, { width: 80 });
+        await QRCode.toCanvas(this.qrCanvas.nativeElement, texto, { width: 100 });
       }
       if (this.qrCanvas2) {
-        await QRCode.toCanvas(this.qrCanvas2.nativeElement, texto, { width: 80 });
+        await QRCode.toCanvas(this.qrCanvas2.nativeElement, texto, { width: 100 });
       }
     }
   }
@@ -63,13 +73,15 @@ export class TicketComponent implements OnInit, AfterViewInit {
       const opciones = {
         format: 'CODE128',
         width: 1.5,
-        height: 35,
+        height: 40,
         displayValue: true,
-        fontSize: 10,
+        fontSize: 11,
         margin: 0
       };
 
-      [this.barcode1, this.barcode2, this.barcode3].forEach(ref => {
+      const barcodes = [this.barcode1, this.barcode2, this.barcode3, this.barcode4];
+
+      barcodes.forEach(ref => {
         if (ref) {
           JsBarcode(ref.nativeElement, valor, opciones);
         }
@@ -82,6 +94,6 @@ export class TicketComponent implements OnInit, AfterViewInit {
   }
 
   volver(): void {
-    this.router.navigate(['/ordenes']);
+    this.router.navigate(['/admin/ordenes']);
   }
 }

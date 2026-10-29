@@ -1,10 +1,163 @@
 <div class="space-y-6">
-  <div>
-    <h1 class="text-3xl font-bold text-tecrob-black">🛒 Carrito de Compras</h1>
-    <p class="text-tecrob-grayText mt-1">Productos seleccionados para venta</p>
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-tecrob-black">🛒 Carrito de Compras</h1>
+      <p class="text-tecrob-grayText mt-1">Productos seleccionados para venta</p>
+    </div>
+    <a routerLink="/admin/productos"
+       class="bg-tecrob-grayMid hover:bg-tecrob-grayText text-tecrob-black px-6 py-3 rounded-lg font-bold transition-all">
+      ← Seguir comprando
+    </a>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-lg p-8 text-center text-tecrob-grayText">
-    Módulo de carrito en construcción
+  <!-- Mensaje -->
+  <div *ngIf="mensaje" 
+       [class.bg-green-100]="mensaje.tipo === 'success'"
+       [class.border-green-500]="mensaje.tipo === 'success'"
+       [class.text-green-700]="mensaje.tipo === 'success'"
+       [class.bg-red-100]="mensaje.tipo === 'error'"
+       [class.border-red-500]="mensaje.tipo === 'error'"
+       [class.text-red-700]="mensaje.tipo === 'error'"
+       class="border-l-4 p-4 rounded-lg">
+    {{ mensaje.texto }}
   </div>
+
+  <!-- Carrito vacío -->
+  <div *ngIf="items.length === 0" class="bg-white rounded-2xl shadow-lg p-12 text-center">
+    <p class="text-6xl mb-4">🛒</p>
+    <h2 class="text-2xl font-bold text-tecrob-black mb-2">Tu carrito está vacío</h2>
+    <p class="text-tecrob-grayText mb-6">Agrega productos desde el catálogo</p>
+    <a routerLink="/admin/productos"
+       class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-8 py-3 rounded-lg font-bold shadow-lg inline-block">
+      📦 Ver Productos
+    </a>
+  </div>
+
+  <!-- Carrito con productos -->
+  <div *ngIf="items.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- TABLA DE ITEMS -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="bg-tecrob-black text-white px-4 py-3 flex justify-between items-center">
+          <h2 class="font-bold">Productos en el carrito ({{ totalItems }})</h2>
+          <button (click)="vaciar()"
+                  class="bg-tecrob-red hover:bg-tecrob-redDark text-white text-xs px-3 py-1 rounded">
+            🗑️ Vaciar todo
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-100 text-tecrob-grayText text-xs">
+              <tr>
+                <th class="py-2 px-3 text-left">Producto</th>
+                <th class="py-2 px-3 text-center">Precio</th>
+                <th class="py-2 px-3 text-center">Cantidad</th>
+                <th class="py-2 px-3 text-center">Subtotal</th>
+                <th class="py-2 px-3 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items" class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-3 px-3">
+                  <p class="font-bold text-tecrob-black">{{ item.producto.nombre }}</p>
+                  <p class="text-xs text-tecrob-grayText">{{ item.producto.codigo }} · {{ item.producto.categoria }}</p>
+                </td>
+                <td class="py-3 px-3 text-center">S/ {{ item.producto.precioVenta.toFixed(2) }}</td>
+                <td class="py-3 px-3 text-center">
+                  <input type="number"
+                         [ngModel]="item.cantidad"
+                         (ngModelChange)="cambiarCantidad(item, $event)"
+                         min="1" [max]="item.producto.stock"
+                         class="w-16 px-2 py-1 border-2 border-tecrob-grayMid rounded text-center text-sm focus:border-tecrob-red focus:outline-none">
+                  <p class="text-xs text-tecrob-grayText mt-1">Stock: {{ item.producto.stock }}</p>
+                </td>
+                <td class="py-3 px-3 text-center font-bold text-tecrob-red">
+                  S/ {{ item.subtotal.toFixed(2) }}
+                </td>
+                <td class="py-3 px-3 text-center">
+                  <button (click)="eliminar(item)"
+                          class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-3 py-1 rounded text-xs">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-4">
+
+        <h2 class="text-xl font-bold text-tecrob-black mb-4">Resumen de Compra</h2>
+
+        <!-- Datos -->
+        <div class="space-y-3 mb-6">
+
+          <div class="flex justify-between text-sm">
+            <span class="text-tecrob-grayText">Subtotal:</span>
+            <span class="font-semibold">S/ {{ subtotal.toFixed(2) }}</span>
+          </div>
+
+          <div class="flex justify-between text-sm">
+            <span class="text-tecrob-grayText">IGV (18%):</span>
+            <span class="font-semibold">S/ {{ igv.toFixed(2) }}</span>
+          </div>
+
+          <div class="border-t pt-3 flex justify-between items-center">
+            <span class="font-bold text-tecrob-black">TOTAL:</span>
+            <span class="text-2xl font-bold text-tecrob-red">S/ {{ total.toFixed(2) }}</span>
+          </div>
+
+        </div>
+
+        <!-- Cliente -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-tecrob-black mb-2">
+            Cliente (opcional)
+          </label>
+          <select [(ngModel)]="clienteSeleccionado"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option [ngValue]="null">Cliente general</option>
+            <option *ngFor="let c of clientes" [ngValue]="c.id">
+              {{ c.nombre }} {{ c.apellidos }} - {{ c.numDocumento }}
+            </option>
+          </select>
+          <p *ngIf="clientes.length === 0" class="text-xs text-tecrob-grayText mt-1">
+            <a routerLink="/admin/clientes" class="text-tecrob-red hover:underline">Registra un cliente</a>
+          </p>
+        </div>
+
+        <!-- Método de pago -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-tecrob-black mb-2">
+            Método de Pago
+          </label>
+          <select [(ngModel)]="metodoPago"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option *ngFor="let m of metodosPago" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+
+        <!-- Botón Finalizar -->
+        <button (click)="finalizarVenta()"
+                class="w-full bg-tecrob-red hover:bg-tecrob-redDark text-white py-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all text-lg">
+          ✅ Finalizar Venta
+        </button>
+
+        <p class="text-xs text-tecrob-grayText text-center mt-3">
+          Total de items: <strong>{{ totalItems }}</strong>
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+
 </div>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, tap } from 'rxjs';
+import { ApiService } from './api.service';
 
 export interface Usuario {
   id: number;
@@ -9,56 +10,48 @@ export interface Usuario {
   rol: 'admin' | 'tecnico';
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface LoginResult {
+  success: boolean;
+  mensaje?: string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly usuarioSubject = new BehaviorSubject<Usuario | null>(null);
+  readonly usuario$: Observable<Usuario | null> = this.usuarioSubject.asObservable();
+  private readonly sesionListaSubject = new BehaviorSubject(false);
+  readonly sesionLista$ = this.sesionListaSubject.asObservable();
 
-  private usuarioSubject = new BehaviorSubject<Usuario | null>(null);
-  public usuario$: Observable<Usuario | null> = this.usuarioSubject.asObservable();
-
-  // Credenciales demo (luego se reemplazan con backend Spring Boot)
-  private readonly CREDENCIALES_DEMO = [
-    { id: 1, nombre: 'Administrador', email: 'admin@tecrob.com', password: 'admin123', rol: 'admin' as const },
-    { id: 2, nombre: 'Carlos Pérez', email: 'carlos@tecrob.com', password: 'admin123', rol: 'tecnico' as const },
-    { id: 3, nombre: 'María Gómez', email: 'maria@tecrob.com', password: 'admin123', rol: 'tecnico' as const },
-    { id: 4, nombre: 'Luis Torres', email: 'luis@tecrob.com', password: 'admin123', rol: 'tecnico' as const }
-  ];
-
-  constructor(private router: Router) {
-    // Restaurar sesión desde localStorage
-    const usuarioGuardado = localStorage.getItem('tecrob_usuario');
-    if (usuarioGuardado) {
-      this.usuarioSubject.next(JSON.parse(usuarioGuardado));
-    }
+  constructor(private router: Router, private api: ApiService) {
+    this.api.get<Usuario>('/auth/session', false).subscribe({
+      next: user => {
+        this.usuarioSubject.next(user);
+        localStorage.setItem('tecrob_usuario', JSON.stringify(user));
+        this.sesionListaSubject.next(true);
+      },
+      error: () => {
+        this.usuarioSubject.next(null);
+        localStorage.removeItem('tecrob_usuario');
+        this.sesionListaSubject.next(true);
+      }
+    });
   }
 
-  login(email: string, password: string): { success: boolean; mensaje?: string } {
-    const usuario = this.CREDENCIALES_DEMO.find(
-      u => u.email === email && u.password === password
+  login(email: string, password: string): Observable<LoginResult> {
+    return this.api.post<Usuario>('/auth/login', { email, password }).pipe(
+      tap(user => {
+        localStorage.setItem('tecrob_usuario', JSON.stringify(user));
+        this.usuarioSubject.next(user);
+      }),
+      map(() => ({ success: true })),
+      catchError(error => of({ success: false, mensaje: this.api.message(error) }))
     );
-
-    if (!usuario) {
-      return { success: false, mensaje: 'Credenciales incorrectas' };
-    }
-
-    const usuarioLogueado: Usuario = {
-      id: usuario.id,
-      nombre: usuario.nombre,
-      email: usuario.email,
-      rol: usuario.rol
-    };
-
-    // Guardar en localStorage
-    localStorage.setItem('tecrob_usuario', JSON.stringify(usuarioLogueado));
-
-    // Actualizar el observable
-    this.usuarioSubject.next(usuarioLogueado);
-
-    return { success: true };
   }
 
   logout(): void {
+    this.api.post<void>('/auth/logout', {}).subscribe({
+      error: error => console.error(this.api.message(error))
+    });
     localStorage.removeItem('tecrob_usuario');
     this.usuarioSubject.next(null);
     this.router.navigate(['/login']);

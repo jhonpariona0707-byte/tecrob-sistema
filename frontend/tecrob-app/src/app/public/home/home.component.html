@@ -1,0 +1,203 @@
+<!-- ===== HERO ===== -->
+<section class="relative bg-gradient-to-br from-tecrob-black via-tecrob-blackSoft to-tecrob-red text-white overflow-hidden">
+
+  <div class="absolute inset-0 opacity-10">
+    <div class="absolute top-0 left-0 w-96 h-96 bg-tecrob-red rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-tecrob-red rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+  </div>
+
+  <div class="container mx-auto px-6 py-20 relative z-10">
+    <div class="max-w-3xl">
+      
+      <div class="inline-block bg-tecrob-red text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+        🔧 SERVICIO TÉCNICO PROFESIONAL
+      </div>
+
+      <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+        Reparación y venta de <span class="text-tecrob-red">computadoras</span>
+      </h1>
+
+      <p class="text-lg md:text-xl text-tecrob-grayMid mb-8 leading-relaxed">
+        Servicio técnico especializado en Ayacucho. Reparamos laptops, PCs, impresoras 
+        y vendemos accesorios de las mejores marcas.
+      </p>
+
+      <div class="flex flex-wrap gap-4">
+        <a routerLink="/productos"
+           class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all no-underline">
+          🛒 Ver Productos
+        </a>
+        <a routerLink="/consulta"
+           class="bg-white text-tecrob-black hover:bg-gray-100 px-8 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all no-underline">
+          🔍 Consultar Reparación
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- ===== SERVICIOS ===== -->
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-tecrob-black mb-2">Nuestros Servicios</h2>
+      <p class="text-tecrob-grayText">Todo lo que necesitas en un solo lugar</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <div class="bg-gray-50 rounded-2xl p-8 text-center hover:shadow-xl transition-all border-t-4 border-tecrob-red">
+        <div class="text-6xl mb-4">🔧</div>
+        <h3 class="text-xl font-bold text-tecrob-black mb-2">Reparación de PCs</h3>
+        <p class="text-tecrob-grayText text-sm">
+          Diagnóstico y reparación de laptops, PCs de escritorio, impresoras y más.
+        </p>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-8 text-center hover:shadow-xl transition-all border-t-4 border-tecrob-black">
+        <div class="text-6xl mb-4">💻</div>
+        <h3 class="text-xl font-bold text-tecrob-black mb-2">Venta de Equipos</h3>
+        <p class="text-tecrob-grayText text-sm">
+          Laptops, PCs de escritorio, impresoras y tablets de las mejores marcas.
+        </p>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-8 text-center hover:shadow-xl transition-all border-t-4 border-tecrob-red">
+        <div class="text-6xl mb-4">🛒</div>
+        <h3 class="text-xl font-bold text-tecrob-black mb-2">Accesorios y Suministros</h3>
+        <p class="text-tecrob-grayText text-sm">
+          Periféricos, componentes, tintas y todo lo que necesitas para tu PC.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCTOS DESTACADOS ===== -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-6">
+    
+    <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+      <div>
+        <h2 class="text-3xl md:text-4xl font-bold text-tecrob-black mb-2">Productos Destacados</h2>
+        <p class="text-tecrob-grayText">Los más vendidos</p>
+      </div>
+      <a routerLink="/productos"
+         class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-2 rounded-lg font-semibold transition-all no-underline">
+        Ver todos →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <div *ngFor="let p of productosDestacados"
+           class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+        
+        <div class="bg-gradient-to-br from-gray-100 to-gray-200 h-40 flex items-center justify-center">
+          <span class="text-6xl">📦</span>
+        </div>
+
+        <div class="p-4">
+          <p class="text-xs text-tecrob-grayText mb-1">{{ p.categoria }}</p>
+          <h3 class="font-bold text-tecrob-black text-sm mb-2 line-clamp-2">{{ p.nombre }}</h3>
+          <p class="text-xl font-bold text-tecrob-red mb-3">S/ {{ p.precioVenta.toFixed(2) }}</p>
+          
+          <a [href]="consultarWhatsApp(p)" target="_blank"
+             class="block w-full bg-green-500 hover:bg-green-600 text-white text-center py-2 rounded-lg text-sm font-bold no-underline transition-all">
+            💬 Consultar
+          </a>
+        </div>
+
+      </div>
+
+      <div *ngIf="productosDestacados.length === 0" class="col-span-full text-center py-12 text-tecrob-grayText">
+        <p class="text-4xl mb-2">📦</p>
+        <p>Próximamente más productos</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONSULTA DE REPARACIÓN ===== -->
+<section class="py-16 bg-tecrob-black text-white">
+  <div class="container mx-auto px-6">
+    
+    <div class="max-w-3xl mx-auto text-center">
+      
+      <div class="text-6xl mb-4">🔍</div>
+      
+      <h2 class="text-3xl md:text-4xl font-bold mb-3">Consulta el Estado de tu Reparación</h2>
+      <p class="text-tecrob-grayMid mb-8 text-lg">
+        Ingresa tu código de orden para ver el estado actual de tu equipo
+      </p>
+
+      <a routerLink="/consulta"
+         class="inline-block bg-tecrob-red hover:bg-tecrob-redDark text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all no-underline">
+        🔍 Consultar Ahora
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== SOBRE NOSOTROS + MAPA ===== -->
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      
+      <div>
+        <h2 class="text-3xl md:text-4xl font-bold text-tecrob-black mb-4">Sobre TecRob</h2>
+        <p class="text-tecrob-grayText mb-4 text-lg leading-relaxed">
+          <strong class="text-tecrob-red">MULTISERVICIOS TECROB SVS E.I.R.L.</strong> 
+          es tu aliado tecnológico en Ayacucho.
+        </p>
+        <p class="text-tecrob-grayText mb-6 leading-relaxed">
+          Ofrecemos servicio técnico profesional en reparación y mantenimiento de 
+          computadoras, además de venta de equipos, accesorios y suministros informáticos.
+        </p>
+
+        <ul class="space-y-3 text-tecrob-grayText">
+          <li class="flex items-start gap-3">
+            <span class="text-tecrob-red text-xl">📍</span>
+            <div>
+              <p class="font-semibold text-tecrob-black">Dirección</p>
+              <p class="text-sm">JR. LIBERTAD N 889A - AYACUCHO</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-tecrob-red text-xl">📞</span>
+            <div>
+              <p class="font-semibold text-tecrob-black">Teléfonos</p>
+              <p class="text-sm">943582185 / 996504233</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-tecrob-red text-xl">✉️</span>
+            <div>
+              <p class="font-semibold text-tecrob-black">Email</p>
+              <p class="text-sm">luis&#64;tecrob.com</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rounded-2xl overflow-hidden shadow-2xl">
+        <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.5234!2d-74.2238!3d-13.1631!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zQUpVQ0hPQ0hPLCBQZXLDug!5e0!3m2!1ses!2spe!4v1234567890"
+          width="100%" 
+          height="400" 
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy">
+        </iframe>
+      </div>
+
+    </div>
+  </div>
+</section>

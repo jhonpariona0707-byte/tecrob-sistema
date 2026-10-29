@@ -1,5 +1,15 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, tap } from 'rxjs';
+import { ApiService } from './api.service';
+
+export interface RepuestoUsado {
+  repuestoId: number;
+  codigo: string;
+  nombre: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
 
 export interface Orden {
   id: number;
@@ -25,52 +35,77 @@ export interface Orden {
   prioridad: string;
   observaciones: string;
   accesorios: string[];
-  estado: 'Pendiente' | 'En reparación' | 'Reparado' | 'Entregado' | 'No reparable';
+  estado: 'Pendiente' | 'En reparación' | 'Esperando repuesto' | 'Reparado' | 'Entregado' | 'No reparable';
   responsable: string;
   subtotal: number;
   adelanto: number;
   saldo: number;
   total: number;
+  manoObra?: number;
+  repuestosUsados: RepuestoUsado[];
+  seguimiento: {
+    estadoAnterior: string | null;
+    estado: Orden['estado'];
+    comentario: string;
+    fecha: string;
+    responsable: string;
+  }[];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface ConsultaOrden {
+  numOrden: string;
+  estado: Orden['estado'];
+  fechaPrometida: string | null;
+  prioridad: string;
+  tipoServicio: string;
+  seguimiento: {
+    estado: Orden['estado'];
+    fecha: string;
+  }[];
+}
+
+@Injectable({ providedIn: 'root' })
 export class OrdenesService {
+  private readonly ordenesSubject = new BehaviorSubject<Orden[]>([]);
+  readonly ordenes$: Observable<Orden[]> = this.ordenesSubject.asObservable();
 
-  private ordenesSubject = new BehaviorSubject<Orden[]>([]);
-  public ordenes$: Observable<Orden[]> = this.ordenesSubject.asObservable();
-
-  private contador = 1;
-
-  constructor() {
-    const guardadas = localStorage.getItem('tecrob_ordenes');
-    if (guardadas) {
-      const ordenes = JSON.parse(guardadas);
-      this.ordenesSubject.next(ordenes);
-      this.contador = ordenes.length + 1;
-    }
+  constructor(private api: ApiService) {
   }
 
-  generarNumeroOrden(): string {
-    const num = this.contador.toString().padStart(5, '0');
-    return `V5-${num}`;
+  recargar(): void {
+    this.cargar().subscribe({
+      error: error => console.error(this.api.message(error))
+    });
   }
 
-  crearOrden(orden: Omit<Orden, 'id' | 'numOrden' | 'fechaIngreso'>): Orden {
-    const nuevaOrden: Orden = {
-      ...orden,
-      id: this.contador,
-      numOrden: this.generarNumeroOrden(),
-      fechaIngreso: new Date().toISOString()
-    };
+  cargar(): Observable<Orden[]> {
+    return this.api.get<Orden[]>('/ordenes').pipe(
+      tap(orders => this.ordenesSubject.next(orders))
+    );
+  }
 
-    const ordenes = [...this.ordenesSubject.value, nuevaOrden];
-    this.ordenesSubject.next(ordenes);
-    localStorage.setItem('tecrob_ordenes', JSON.stringify(ordenes));
+  crearOrden(orden: Omit<Orden, 'id' | 'numOrden' | 'fechaIngreso' | 'seguimiento'>):
+    Observable<{ orden: Orden | null; mensaje?: string }> {
+    return this.api.post<Orden>('/ordenes', orden).pipe(
+      tap(created => this.ordenesSubject.next([created, ...this.ordenesSubject.value])),
+      map(created => ({ orden: created })),
+      catchError(error => of({ orden: null, mensaje: this.api.message(error) }))
+    );
+  }
 
-    this.contador++;
-    return nuevaOrden;
+  cambiarEstado(numOrden: string, estado: Orden['estado'], comentario = ''): Observable<Orden | null> {
+    return this.api.put<Orden>(`/ordenes/${encodeURIComponent(numOrden)}/estado`, {
+      estado,
+      comentario
+    }).pipe(
+      tap(updated => this.ordenesSubject.next(
+        this.ordenesSubject.value.map(order => order.numOrden === numOrden ? updated : order)
+      )),
+      catchError(error => {
+        console.error(this.api.message(error));
+        return of(null);
+      })
+    );
   }
 
   getOrdenes(): Orden[] {
@@ -78,6 +113,19 @@ export class OrdenesService {
   }
 
   getOrdenPorNumero(numOrden: string): Orden | undefined {
-    return this.ordenesSubject.value.find(o => o.numOrden === numOrden);
+    return this.ordenesSubject.value.find(order => order.numOrden === numOrden);
   }
+
+  buscarOrdenPorNumero(numOrden: string): Observable<Orden | null> {
+    return this.api.get<Orden>(`/ordenes/${encodeURIComponent(numOrden)}`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
+  buscarOrdenPublica(numOrden: string): Observable<ConsultaOrden | null> {
+    return this.api.get<ConsultaOrden>(`/consulta/${encodeURIComponent(numOrden)}`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
 }

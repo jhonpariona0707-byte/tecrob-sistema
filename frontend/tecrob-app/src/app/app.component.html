@@ -1,1 +1,6 @@
+<div *ngIf="api.apiError$ | async as apiError"
+     class="fixed top-3 left-1/2 z-[100] w-[min(90%,40rem)] -translate-x-1/2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-lg"
+     role="alert">
+  {{ apiError }}
+</div>
 <router-outlet></router-outlet>

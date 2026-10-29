@@ -1,17 +1,209 @@
 <div class="space-y-6">
-  
+
+  <!-- Encabezado -->
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold text-tecrob-black">👥 Clientes</h1>
       <p class="text-tecrob-grayText mt-1">Gestión de clientes de TecRob</p>
     </div>
-    <button class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg">
+    <button (click)="abrirModalNuevo()"
+            class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
       + Nuevo Cliente
     </button>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-lg p-8 text-center text-tecrob-grayText">
-    Módulo de clientes en construcción
+
+  <!-- Mensaje -->
+  <div *ngIf="mensaje" 
+       [class.bg-green-100]="mensaje.tipo === 'success'"
+       [class.border-green-500]="mensaje.tipo === 'success'"
+       [class.text-green-700]="mensaje.tipo === 'success'"
+       [class.bg-red-100]="mensaje.tipo === 'error'"
+       [class.border-red-500]="mensaje.tipo === 'error'"
+       [class.text-red-700]="mensaje.tipo === 'error'"
+       class="border-l-4 p-4 rounded-lg">
+    {{ mensaje.texto }}
   </div>
 
+  <!-- Buscador -->
+  <div class="bg-white rounded-2xl shadow-lg p-4">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🔍</span>
+      <input type="text"
+             [(ngModel)]="buscar"
+             (ngModelChange)="filtrar()"
+             placeholder="Buscar por nombre, apellido, DNI o teléfono..."
+             class="flex-1 px-4 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-tecrob-black text-white">
+          <tr>
+            <th class="py-3 px-4 text-left">#</th>
+            <th class="py-3 px-4 text-left">Documento</th>
+            <th class="py-3 px-4 text-left">Nombre Completo</th>
+            <th class="py-3 px-4 text-left">Teléfono</th>
+            <th class="py-3 px-4 text-left">Email</th>
+            <th class="py-3 px-4 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of (clientesFiltrados | slice:(pagina - 1) * filasPorPagina:pagina * filasPorPagina); let i = index"
+              class="border-b border-gray-100 hover:bg-gray-50 transition-all">
+            <td class="py-3 px-4">{{ (pagina - 1) * filasPorPagina + i + 1 }}</td>
+            <td class="py-3 px-4">
+              <span class="inline-block bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded mr-2">
+                {{ c.tipoDocumento }}
+              </span>
+              {{ c.numDocumento }}
+            </td>
+            <td class="py-3 px-4 font-semibold">{{ c.nombre }} {{ c.apellidos }}</td>
+            <td class="py-3 px-4">{{ c.telefono || '-' }}</td>
+            <td class="py-3 px-4">{{ c.email || '-' }}</td>
+            <td class="py-3 px-4 text-center">
+              <button (click)="abrirModalEditar(c)"
+                      class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs font-semibold mr-1">
+                ✏ Editar
+              </button>
+              <button (click)="eliminar(c)"
+                      class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-3 py-1 rounded text-xs font-semibold">
+                🗑 Eliminar
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="clientesFiltrados.length === 0">
+            <td colspan="6" class="py-10 text-center text-tecrob-grayText">
+              <p class="text-2xl mb-2">👥</p>
+              <p *ngIf="buscar">No se encontraron clientes con "{{ buscar }}"</p>
+              <p *ngIf="!buscar">Aún no hay clientes registrados</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <app-pagination *ngIf="clientesFiltrados.length > 0"
+                  [totalItems]="clientesFiltrados.length"
+                  [currentPage]="pagina"
+                  [pageSize]="filasPorPagina"
+                  (pageChange)="pagina = $event"
+                  (pageSizeChange)="filasPorPagina = $event; pagina = 1">
+  </app-pagination>
+
+</div>
+
+<!-- =============================================
+     MODAL CLIENTE (Nuevo / Editar)
+============================================== -->
+<div *ngIf="mostrarModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+    <!-- Header del modal -->
+    <div class="bg-gradient-to-r from-tecrob-red to-tecrob-redDark text-white px-6 py-4 flex justify-between items-center">
+      <h2 class="text-xl font-bold">
+        {{ modoEdicion ? '✏ Editar Cliente' : '+ Nuevo Cliente' }}
+      </h2>
+      <button (click)="cerrarModal()" class="text-white text-2xl hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center">
+        ✕
+      </button>
+    </div>
+
+    <!-- Cuerpo del modal -->
+    <div class="p-6 space-y-4">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Tipo Documento *</label>
+          <select [(ngModel)]="clienteForm.tipoDocumento"
+                  class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+            <option value="DNI">DNI</option>
+            <option value="RUC">RUC</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="Carnet Extranjeria">Carnet Extranjería</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">N° Documento *</label>
+          <input type="text" [(ngModel)]="clienteForm.numDocumento"
+                 placeholder="12345678"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Nombres *</label>
+          <input type="text" [(ngModel)]="clienteForm.nombre"
+                 placeholder="Juan"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Apellidos *</label>
+          <input type="text" [(ngModel)]="clienteForm.apellidos"
+                 placeholder="Pérez"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Teléfono</label>
+          <input type="text" [(ngModel)]="clienteForm.telefono"
+                 placeholder="987654321"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Email</label>
+          <input type="email" [(ngModel)]="clienteForm.email"
+                 placeholder="cliente&#64;email.com"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Dirección</label>
+          <input type="text" [(ngModel)]="clienteForm.direccion"
+                 placeholder="Av. Principal 123"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-tecrob-black mb-1">Referencia</label>
+          <input type="text" [(ngModel)]="clienteForm.referencia"
+                 placeholder="Cerca al parque"
+                 class="w-full px-3 py-2 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-sm">
+        </div>
+
+      </div>
+
+      <!-- Mensaje dentro del modal -->
+      <div *ngIf="mensaje" 
+           [class.bg-green-100]="mensaje.tipo === 'success'"
+           [class.border-green-500]="mensaje.tipo === 'success'"
+           [class.text-green-700]="mensaje.tipo === 'success'"
+           [class.bg-red-100]="mensaje.tipo === 'error'"
+           [class.border-red-500]="mensaje.tipo === 'error'"
+           [class.text-red-700]="mensaje.tipo === 'error'"
+           class="border-l-4 p-3 rounded-lg text-sm">
+        {{ mensaje.texto }}
+      </div>
+
+    </div>
+
+    <!-- Footer del modal -->
+    <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
+      <button (click)="cerrarModal()"
+              class="bg-tecrob-grayMid text-tecrob-black px-6 py-2 rounded-lg font-semibold hover:bg-tecrob-grayText transition-all">
+        Cancelar
+      </button>
+      <button (click)="guardar()"
+              class="bg-tecrob-red hover:bg-tecrob-redDark text-white px-6 py-2 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+        {{ modoEdicion ? '💾 Actualizar' : '💾 Guardar' }}
+      </button>
+    </div>
+
+  </div>
 </div>

@@ -1,0 +1,138 @@
+<!-- Banner superior -->
+<section class="bg-gradient-to-r from-tecrob-black to-tecrob-blackSoft text-white py-16">
+  <div class="container mx-auto px-6 text-center">
+    <div class="text-6xl mb-4">🔍</div>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Consulta tu Reparación</h1>
+    <p class="text-tecrob-grayMid text-lg">
+      Ingresa tu código de orden para ver el estado de tu equipo
+    </p>
+  </div>
+</section>
+
+<!-- Formulario -->
+<section class="py-12 bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-6 max-w-4xl">
+
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+      
+      <form (ngSubmit)="consultar()" class="space-y-4">
+        
+        <div>
+          <label class="block text-sm font-semibold text-tecrob-black mb-2">
+            🔎 Código de Orden
+          </label>
+          <div class="flex gap-3 flex-col sm:flex-row">
+            <input type="text"
+                   [(ngModel)]="codigo"
+                   name="codigo"
+                   placeholder="Ej: V5-00020"
+                   class="flex-1 px-4 py-3 border-2 border-tecrob-grayMid rounded-lg focus:border-tecrob-red focus:outline-none text-base"
+                   [disabled]="buscando">
+            <button type="submit"
+                    [disabled]="buscando"
+                    class="bg-tecrob-red hover:bg-tecrob-redDark disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all">
+              {{ buscando ? '⏳ Buscando...' : '🔍 Consultar' }}
+            </button>
+          </div>
+        </div>
+
+        <p class="text-xs text-tecrob-grayText">
+          💡 El código de orden está en tu ticket de reparación (formato: V5-XXXXX)
+        </p>
+
+      </form>
+
+      <div *ngIf="error" class="mt-4 bg-red-100 border-l-4 border-tecrob-red text-tecrob-red p-4 rounded-lg">
+        ❌ {{ error }}
+      </div>
+
+    </div>
+
+    <!-- Resultado -->
+    <div *ngIf="orden" class="bg-white rounded-2xl shadow-xl overflow-hidden">
+
+      <div class="bg-gradient-to-r from-tecrob-red to-tecrob-redDark text-white p-6">
+        <div class="flex justify-between items-start flex-wrap gap-3">
+          <div>
+            <p class="text-sm text-white/80 mb-1">Orden de Servicio</p>
+            <h2 class="text-3xl font-bold">{{ orden.numOrden }}</h2>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-white/80 mb-1">Estado</p>
+            <span [class]="getEstadoBadge(orden.estado)" 
+                  class="inline-block text-white text-sm font-bold px-4 py-2 rounded-lg">
+              {{ getEstadoIcono(orden.estado) }} {{ orden.estado }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 border-b">
+        <h3 class="font-bold text-tecrob-black mb-4">🔧 Datos del Servicio</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <p class="text-xs text-tecrob-grayText">Tipo</p>
+            <p class="font-semibold text-tecrob-black text-sm">{{ orden.tipoServicio }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-tecrob-grayText">Prioridad</p>
+            <p class="font-semibold text-tecrob-black text-sm">{{ orden.prioridad }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-tecrob-grayText">F. Entrega Prometida</p>
+            <p class="font-semibold text-tecrob-black text-sm">
+              {{ orden.fechaPrometida ? (orden.fechaPrometida | date:'dd/MM/yyyy') : 'Por definir' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 border-b">
+        <h3 class="mb-5 font-bold text-tecrob-black">📍 Historial de seguimiento</h3>
+        <ol *ngIf="orden.seguimiento.length > 0; else sinSeguimiento"
+            class="relative ml-2 border-l-2 border-gray-200">
+          <li *ngFor="let evento of orden.seguimiento; let primero = first"
+              class="relative ml-6 pb-6 last:pb-0">
+            <span class="absolute -left-[2.05rem] flex h-4 w-4 items-center justify-center rounded-full border-2 border-white"
+                  [class.bg-tecrob-red]="primero"
+                  [class.bg-gray-300]="!primero">
+            </span>
+            <p class="font-semibold text-tecrob-black">{{ evento.estado }}</p>
+            <time class="text-xs text-tecrob-grayText">{{ evento.fecha | date:'dd/MM/yyyy HH:mm' }}</time>
+          </li>
+        </ol>
+        <ng-template #sinSeguimiento>
+          <p class="text-sm text-tecrob-grayText">Todavía no hay actualizaciones de seguimiento.</p>
+        </ng-template>
+      </div>
+
+      <div class="p-6 bg-gray-50 text-center text-sm text-gray-600">
+        Por seguridad, el seguimiento público muestra únicamente los estados y sus fechas, sin datos personales.
+      </div>
+
+      <div class="p-6 bg-white border-t flex flex-col sm:flex-row gap-3 justify-center">
+        <a [href]="consultarWhatsApp()" target="_blank"
+           class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold text-center no-underline transition-all">
+          💬 Consultar por WhatsApp
+        </a>
+        <button (click)="limpiar()"
+                class="bg-tecrob-grayMid hover:bg-tecrob-grayText text-tecrob-black px-6 py-3 rounded-lg font-bold transition-all">
+          🔄 Nueva Consulta
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Ayuda -->
+    <div *ngIf="!orden && !error" class="mt-8 bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+      <h4 class="font-bold text-blue-900 mb-2">💡 ¿Cómo funciona?</h4>
+      <ol class="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+        <li>Ingresa el código de tu orden (V5-XXXXX) que aparece en tu ticket.</li>
+        <li>Haz clic en "Consultar".</li>
+        <li>Verás el estado actual de tu reparación y el saldo pendiente.</li>
+        <li>Si tienes dudas, contáctanos por WhatsApp.</li>
+      </ol>
+    </div>
+
+  </div>
+</section>
